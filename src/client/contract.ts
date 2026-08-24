@@ -122,3 +122,38 @@ export function createContractEngine(
 export function isEmptySession(root: ParentNode): boolean {
   return root.querySelector(HERO_PHASE_SELECTOR) !== null
 }
+
+export const TOOL_ROW_SELECTOR = "[data-chat-flow] [data-tool][data-state]"
+export const USER_ROW_SELECTOR = "[data-chat-flow] [class*='_userRow']"
+
+export interface BattleTelemetry {
+  currentTool?: string
+  beads: number
+}
+
+function toolName(row: Element): string | undefined {
+  const raw = row.getAttribute('data-tool')?.trim()
+  if (raw === undefined || raw === '' || raw === 'true' || raw === 'false') return undefined
+  return raw
+}
+
+/* 棍势是挣来的：当前回合（最后用户行之后）最后一次失误后的连续战果，上限四颗。 */
+export function readBattleTelemetry(root: ParentNode): BattleTelemetry {
+  const rows = [...root.querySelectorAll(TOOL_ROW_SELECTOR)]
+  const users = root.querySelectorAll(USER_ROW_SELECTOR)
+  const lastUser = users[users.length - 1]
+  const turnRows = lastUser === undefined ? rows : rows.filter(row => (
+    (lastUser.compareDocumentPosition(row) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
+  ))
+  let beads = 0
+  for (const row of turnRows) {
+    const state = row.getAttribute('data-state')
+    if (state === 'error') beads = 0
+    else if (state === 'ok') beads += 1
+  }
+  const running = [...turnRows].reverse().find(row => row.getAttribute('data-state') === 'running')
+  return {
+    currentTool: running === undefined ? undefined : toolName(running),
+    beads: Math.min(beads, 4),
+  }
+}

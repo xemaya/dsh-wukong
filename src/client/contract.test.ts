@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createContractEngine, isEmptySession, STATE_LABELS, type SkinState } from './contract.ts'
+import { createContractEngine, isEmptySession, STATE_LABELS, type SkinState, readBattleTelemetry } from './contract.ts'
 
 const flow = (inner: string): string => `<div data-chat-flow>${inner}</div>`
 const runningTool = '<div data-tool data-state="running"></div>'
@@ -139,5 +139,39 @@ describe('isEmptySession', () => {
   it("data-phase='hero' → true（产品自身的 New Session/空会话信号）", () => {
     root.innerHTML = "<div data-phase='hero'></div>"
     expect(isEmptySession(root)).toBe(true)
+  })
+})
+
+const tool = (state: string, name = 'Bash'): string => `<div data-tool="${name}" data-state="${state}"></div>`
+const userRow = '<div class="x_userRow_x"></div>'
+
+describe('readBattleTelemetry', () => {
+  let root: HTMLElement
+  beforeEach(() => { root = document.createElement('div'); document.body.append(root) })
+  afterEach(() => root.remove())
+
+  it('空流 → 0 珠无当前招式', () => {
+    root.innerHTML = flow('')
+    expect(readBattleTelemetry(root)).toEqual({ currentTool: undefined, beads: 0 })
+  })
+
+  it('当前回合 ok 行积珠，上限 4', () => {
+    root.innerHTML = flow(userRow + tool('ok') + tool('ok') + tool('ok') + tool('ok') + tool('ok') + tool('running', 'Edit'))
+    expect(readBattleTelemetry(root)).toEqual({ currentTool: 'Edit', beads: 4 })
+  })
+
+  it('error 清零：只数最后一个 error 之后的 ok', () => {
+    root.innerHTML = flow(userRow + tool('ok') + tool('error') + tool('ok') + tool('ok'))
+    expect(readBattleTelemetry(root).beads).toBe(2)
+  })
+
+  it('上一回合的行不计入：只数最后用户行之后', () => {
+    root.innerHTML = flow(tool('ok') + tool('ok') + userRow + tool('ok'))
+    expect(readBattleTelemetry(root).beads).toBe(1)
+  })
+
+  it('data-tool 为 true/false/空时无招式名', () => {
+    root.innerHTML = flow(userRow + '<div data-tool data-state="running"></div>')
+    expect(readBattleTelemetry(root).currentTool).toBeUndefined()
   })
 })
