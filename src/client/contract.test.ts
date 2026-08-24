@@ -62,6 +62,18 @@ describe('createContractEngine', () => {
     expect(states.filter(s => s === 'alert')).toHaveLength(1)
   })
 
+  it('alert 中出现 data-question-key → 立即为岔路（不等 alertMs）', () => {
+    mount(flow(runningTool))
+    root.querySelector('[data-chat-flow]')!.insertAdjacentHTML('beforeend', errorTool)
+    engine.sync()
+    expect(states.at(-1)).toBe('alert')
+    // 在 alertMs 超时前插入 data-question-key
+    root.insertAdjacentHTML('beforeend', '<div data-question-key="q1"></div>')
+    engine.sync()
+    // 应立即为 choice，无需等待 alert 超时
+    expect(states.at(-1)).toBe('choice')
+  })
+
   it('战斗结束且 todo 全部 completed → 功成，随后回问道', () => {
     mount(flow(runningTool) + `<div data-testid="todo-panel"><ul>
       <li data-status="completed"></li><li data-status="completed"></li></ul></div>`)

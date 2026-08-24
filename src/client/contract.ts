@@ -89,6 +89,14 @@ export function createContractEngine(
       setTransient('clear', clearMs)
     }
     steady = next
+
+    /* 岔路是用户阻塞态，优先呈现——取消任何挂起的临时状态 */
+    if (next === 'choice' && transient !== undefined) {
+      if (timer !== undefined) clearTimeout(timer)
+      transient = undefined
+      timer = undefined
+    }
+
     render()
   }
 
