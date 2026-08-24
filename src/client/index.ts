@@ -10,7 +10,7 @@ import { createCover } from './cover.ts'
 import { createHud } from './hud.ts'
 import { createLoadout } from './loadout.ts'
 import { createStage } from './stage.ts'
-import { createInkTransition } from './vfx.ts'
+import { createFreezeRing, createInkTransition } from './vfx.ts'
 import { WK_ICON, WK_BG_DIALOGUE, WK_BG_EXECUTION } from './art.generated.ts'
 import './wukong.module.css'
 
@@ -18,6 +18,11 @@ const SKIN_OWNER = 'wukong'
 const SKIN_TITLE = 'DSH // 天命'
 const SKIN_CHROME_COLOR = '#080706'
 const COMPOSER_SEAT_SELECTOR = '[data-composer-seat]'
+/* Stop 按钮无 data-slot 等稳定钩子（dsh-upstream ui-conversation/src/client/skeleton/
+   InputBar.tsx:797-810,812-831）：独立 Stop 按钮与"主按钮变身 Stop"两处均只有
+   aria-label={t('input.stop')}，取值 '停止生成'（locales.ts:24）/ 'Stop generating'
+   （locales.ts:201）。故按兜底方案匹配：座内 button 的 aria-label 含 stop/停止。 */
+const STOP_LABEL_PATTERN = /stop|停止/i
 
 export function apply(ctx: Context): void {
   const body = document.body
@@ -50,6 +55,20 @@ export function apply(ctx: Context): void {
   const { chip: loadoutChip, sync: syncLoadout } = createLoadout()
   const ink = createInkTransition()
   ctx.effect(() => () => ink.dispose(), 'ui-skin-wukong: ink transition')
+
+  const freeze = createFreezeRing()
+  ctx.effect(() => () => freeze.dispose(), 'ui-skin-wukong: freeze ring')
+  const onStopClick = (event: MouseEvent): void => {
+    const target = event.target
+    if (!(target instanceof Element)) return
+    const button = target.closest('button[aria-label]')
+    if (button === null || button.closest(COMPOSER_SEAT_SELECTOR) === null) return
+    const label = button.getAttribute('aria-label') ?? ''
+    if (!STOP_LABEL_PATTERN.test(label)) return
+    if (body.dataset.wukongState === 'battle') freeze.play()
+  }
+  document.addEventListener('click', onStopClick, { capture: true, passive: true })
+  ctx.effect(() => () => document.removeEventListener('click', onStopClick, { capture: true }), 'ui-skin-wukong: stop listener')
 
   const refreshHud = (): void => {
     syncHud((body.dataset.wukongState ?? 'dialogue') as SkinState, readBattleTelemetry(body))

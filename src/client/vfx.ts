@@ -1,5 +1,6 @@
 /**
- * DSH // 天命 — 一次性特效。P1 仅水墨转场：状态切换时全屏墨晕擦过。
+ * DSH // 天命 — 一次性特效。状态切换时全屏墨晕擦过（水墨转场）；
+ * 用户点 Stop 打断降妖态时金圈定格（定身术）。
  * 反馈不是灯光秀：同一时刻至多一层，reduced-motion 下完全不播。
  */
 import styles from './wukong.module.css'
@@ -9,9 +10,7 @@ export interface InkTransition {
   dispose(): void
 }
 
-const INK_MS = 620
-
-export function createInkTransition(): InkTransition {
+function createOneShot(className: string, ms: number): InkTransition {
   let node: HTMLDivElement | undefined
   let timer: ReturnType<typeof setTimeout> | undefined
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
@@ -22,13 +21,13 @@ export function createInkTransition(): InkTransition {
       node = document.createElement('div')
       node.dataset.skinOwner = 'wukong'
       node.setAttribute('aria-hidden', 'true')
-      node.className = styles.inkWipe
+      node.className = className
       document.body.append(node)
       timer = setTimeout(() => {
         node?.remove()
         node = undefined
         timer = undefined
-      }, INK_MS)
+      }, ms)
     },
     dispose(): void {
       if (timer !== undefined) clearTimeout(timer)
@@ -37,3 +36,6 @@ export function createInkTransition(): InkTransition {
     },
   }
 }
+
+export const createInkTransition = (): InkTransition => createOneShot(styles.inkWipe, 620)
+export const createFreezeRing = (): InkTransition => createOneShot(styles.freezeRing, 900)

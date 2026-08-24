@@ -316,6 +316,24 @@
   .inkWipe { display: none; }
 }
 
+/* ===== 定身术（P3）：用户点 Stop 的一次性金圈定格 ===== */
+.freezeRing {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 55%, transparent 30%, rgba(224, 177, 103, 0.16) 46%, transparent 62%);
+  animation: wkFreeze 0.9s ease-out forwards;
+}
+@keyframes wkFreeze {
+  0% { opacity: 0; transform: scale(0.4); }
+  22% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.25); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .freezeRing { display: none; }
+}
+
 /* ===== 棍势 HUD（P2）：仅降妖/受创可见 ===== */
 .hud {
   position: fixed;
@@ -361,6 +379,26 @@
   background: var(--wk-gold2);
   border-color: var(--wk-gold2);
   box-shadow: 0 0 6px rgba(224, 177, 103, 0.55);
+}
+/* 珠位点亮脉冲与受创一次性震动（动画只在属性翻转瞬间播一次） */
+.hudBeads i[data-lit] {
+  animation: wkBeadPulse 0.32s ease-out;
+}
+@keyframes wkBeadPulse {
+  0% { transform: rotate(45deg) scale(1.7); }
+  100% { transform: rotate(45deg) scale(1); }
+}
+:global(body[data-dsh-wukong][data-wukong-state='alert']) .hud {
+  animation: wkHudShake 0.4s ease-out;
+}
+@keyframes wkHudShake {
+  0%, 100% { transform: translateX(-50%); }
+  25% { transform: translateX(calc(-50% - 5px)); }
+  55% { transform: translateX(calc(-50% + 4px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hudBeads i[data-lit],
+  :global(body[data-dsh-wukong][data-wukong-state='alert']) .hud { animation: none; }
 }
 
 /* ===== 岔路签文（P2）：只描皮，不动交互 ===== */
