@@ -347,3 +347,31 @@
   border-color: var(--wk-gold2);
   box-shadow: 0 0 6px rgba(224, 177, 103, 0.55);
 }
+
+/* ===== 岔路签文（P2）：只描皮，不动交互 ===== */
+:global(body[data-dsh-wukong][data-wukong-state='choice']) :global([data-chat-flow]) {
+  opacity: 0.55;
+  transition: opacity 0.25s ease;
+}
+:global(body[data-dsh-wukong]) :global([data-question-key]),
+:global(body[data-dsh-wukong]) :global([data-plan-review-key]),
+:global(body[data-dsh-wukong]) :global([data-approval-key]) {
+  border: 1px solid rgba(211, 164, 91, 0.35);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(38, 29, 19, 0.5), rgba(17, 14, 11, 0.85));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  counter-reset: wk-route;
+}
+:global(body[data-dsh-wukong]) :global([data-question-key]) button,
+:global(body[data-dsh-wukong]) :global([data-plan-review-key]) button,
+:global(body[data-dsh-wukong]) :global([data-approval-key]) button {
+  position: relative;
+  border-color: rgba(211, 164, 91, 0.28);
+}
+:global(body[data-dsh-wukong]) :global([data-question-key]) button:focus-visible,
+:global(body[data-dsh-wukong]) :global([data-plan-review-key]) button:focus-visible,
+:global(body[data-dsh-wukong]) :global([data-approval-key]) button:focus-visible {
+  outline: 2px solid var(--wk-gold2);
+  outline-offset: 2px;
+}
