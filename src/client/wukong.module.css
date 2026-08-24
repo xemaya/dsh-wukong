@@ -64,7 +64,7 @@
 /* Primary send/invoke action: the one gold-filled surface in the whole skin. */
 :global(body[data-dsh-wukong]) [data-composer-card] [class*='_trailing'] button[class*='_primary'] {
   background: linear-gradient(180deg, var(--wk-gold2), #a66c35);
-  border: 1px solid #a86b34;
+  border: 1px solid var(--wk-bronze);
   color: #21150b;
   transition: filter 140ms ease;
 }

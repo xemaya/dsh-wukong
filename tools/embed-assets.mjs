@@ -1,9 +1,6 @@
 /**
  * Embed assets-gen/* into src/client/art.generated.ts as data URIs so the
  * client bundle activates without any temp files or remote URLs.
- *
- * tool-emblems.svg is split by its stable group ids into standalone SVG data
- * URIs (AG_EMBLEMS) so the HUD can badge real tools without rasterizing.
  */
 import { readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'

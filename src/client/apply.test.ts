@@ -169,4 +169,18 @@ describe('apply', () => {
     dispose()
     expect(meta.content).toBe('#123456')
   })
+
+  it('其他皮肤的 data-skin-owner 节点增删不驱动状态机', async () => {
+    const { ctx, dispose } = fakeCtx()
+    apply(ctx as never)
+    const alien = document.createElement('div')
+    alien.dataset.skinOwner = 'someothersk'
+    alien.innerHTML = '<div data-tool data-state="running"></div>'
+    document.body.append(alien)
+    await new Promise(r => setTimeout(r, 50))
+    // alien 子树不在 [data-chat-flow] 里，本就不该驱动；断言的是"没有因节点增删而 sync 出 battle"
+    expect(document.body.dataset.wukongState).toBe('dialogue')
+    alien.remove()
+    dispose()
+  })
 })

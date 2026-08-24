@@ -25,7 +25,7 @@
     "test": "vitest run",
     "generate:assets": "node tools/embed-assets.mjs"
   },
-  "license": "MIT",
+  "license": "UNLICENSED",
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1"
   },
@@ -41,7 +41,6 @@
     "lib/client.js",
     "cordis.patch.yml",
     "skin.json",
-    "preview",
     "src",
     "tools",
     "assets-gen",

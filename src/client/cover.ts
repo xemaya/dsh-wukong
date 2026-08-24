@@ -8,6 +8,7 @@ import styles from './wukong.module.css'
 export function createCover(): { cover: HTMLDivElement; setVisible(visible: boolean): void } {
   const cover = document.createElement('div')
   cover.dataset.skinOwner = 'wukong'
+  cover.setAttribute('aria-hidden', 'true')
   cover.className = styles.cover
   cover.innerHTML = `
     <img class="${styles.coverArt}" alt="" src="${WK_COVER}"/>

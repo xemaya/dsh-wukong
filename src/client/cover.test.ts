@@ -19,4 +19,9 @@ describe('createCover', () => {
     expect(cover.querySelector('img')).not.toBeNull()
     expect(cover.querySelector('h1')?.textContent).toBe('直 面 天 命')
   })
+
+  it('封面是纯装饰层：aria-hidden', () => {
+    const { cover } = createCover()
+    expect(cover.getAttribute('aria-hidden')).toBe('true')
+  })
 })

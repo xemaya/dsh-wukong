@@ -92,6 +92,15 @@ describe('createContractEngine', () => {
     expect(states.at(-1)).toBe('dialogue')
   })
 
+  it('todo 部分完成 → 战斗结束不功成', () => {
+    mount(flow(runningTool) + `<div data-testid="todo-panel"><ul>
+      <li data-status="completed"></li><li data-status="pending"></li></ul></div>`)
+    root.querySelector('[data-tool]')!.setAttribute('data-state', 'ok')
+    engine.sync()
+    expect(states).not.toContain('clear')
+    expect(states.at(-1)).toBe('dialogue')
+  })
+
   it('dispose 后不再回调，定时器清理', () => {
     mount(flow(runningTool))
     root.querySelector('[data-chat-flow]')!.insertAdjacentHTML('beforeend', errorTool)

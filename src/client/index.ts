@@ -138,7 +138,7 @@ export function apply(ctx: Context): void {
       if (skinOwnedTarget) continue
       const nodes = [...record.addedNodes, ...record.removedNodes]
       const skinOwned = nodes.every(node => (
-        node instanceof Element && node.getAttribute('data-skin-owner') === SKIN_OWNER
+        node instanceof Element && node.hasAttribute('data-skin-owner')
       ))
       if (nodes.length > 0 && !skinOwned) {
         relevant = true

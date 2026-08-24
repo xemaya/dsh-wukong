@@ -36,18 +36,16 @@ dsh plugin --profile web remove @dsh-external/dsh-wukong
 > livelock（完全卡死，DevTools 也无法执行任何脚本）。若本机已装有其他
 > 皮肤（如 dsh-afterglow），请先卸载它再安装本皮肤。
 
-## P0 状态
+## P0/P1 状态
 
-当前为 P0（骨架 + 可安装 + 五态状态机 + New Session 封面）：
+P0 完成（骨架 + 可安装 + 五态状态机 + New Session 封面 + 立绘/场景美术接入）；P1 实施中：
 
 - 已完成：仓库骨架、`contract.ts` 五态状态机（含历史错误基线，重载旧会话不会
-  误报"受创"）、`--wk-*` token 与执行态渐变占位视觉、New Session 封面页
-  （"直 面 天 命"）、安装 / 卸载 / 重装全链路 playtest 验证。
-- **场景 / 立绘美术资产待 codex 生产**：当前封面与执行态背景均为渐变占位，
-  已预留美术接入 hook（`art.generated.ts` 由 `tools/embed-assets.mjs` 从
-  `assets-gen/*.webp` 生成，产出后替换即可，无需改动状态机/呈现层逻辑）。
-- P1–P3（立绘 / HUD / 棍势特效 / 岔路呈现 / 披挂装备位 / 章回节奏 / 影神图 /
-  VFX）不在本轮范围内。
+  误报"受创"）、`--wk-*` token、New Session 封面页（"直 面 天 命"）、立绘与场景
+  美术资产、安装 / 卸载 / 重装全链路 playtest 验证。
+- 美术资产处理：由 `art-production/p0/` 原图经 cwebp 压缩为 `assets-gen/*.webp` 内嵌，
+  `art.generated.ts` 由 `tools/embed-assets.mjs` 自动生成，无需手动改动。
+- P1–P3（HUD / 棍势特效 / 岔路呈现 / 披挂装备位 / 章回节奏 / 影神图 / VFX）不在本轮范围内。
 
 ## 开发
 
