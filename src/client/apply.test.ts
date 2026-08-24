@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { apply } from './index.ts'
+import { WK_POSE_EXECUTION } from './art.generated.ts'
 
 function fakeCtx() {
   const disposers: Array<() => void> = []
@@ -102,6 +103,43 @@ describe('apply', () => {
     await new Promise(r => setTimeout(r, 50))
     expect(cover.dataset.visible).toBeUndefined()
     dispose()
+  })
+
+  it('舞台随状态换姿势；空会话（[data-phase="hero"]）时 body 置位 data-wukong-empty', async () => {
+    /* isEmptySession 现实现（contract.ts）：仅看 [data-phase='hero'] 是否存在，
+       无 chat-flow 兜底逻辑；页面初始若无任何 data-phase 节点，判定为“非空”，
+       与 apply.test 既有的封面用例（"无 hero 信号则不可见"）一致。此处显式插入
+       hero 节点以构造真实的空会话前提，而不是依赖“无 data-phase = 空”的误设。 */
+    document.body.insertAdjacentHTML('beforeend', "<div data-phase='hero'></div>")
+    const { ctx, dispose } = fakeCtx()
+    apply(ctx as never)
+    expect(document.body.dataset.wukongEmpty).toBe('')
+    expect(document.querySelector('[data-skin-owner="wukong"] img[data-active]')).not.toBeNull()
+
+    document.body.insertAdjacentHTML('beforeend',
+      '<div data-chat-flow><div data-tool data-state="running"></div></div>')
+    await new Promise(r => setTimeout(r, 50))
+    /* hero 节点仍在 DOM 中——空会话判定与状态机判定相互独立，舞台照样随
+       真实状态换姿势。 */
+    expect(document.body.dataset.wukongState).toBe('battle')
+    const active = document.querySelector('[data-skin-owner="wukong"] img[data-active]') as HTMLImageElement
+    expect(active.src).toBe(WK_POSE_EXECUTION)
+
+    document.querySelector('[data-phase]')!.setAttribute('data-phase', 'active')
+    await new Promise(r => setTimeout(r, 50))
+    expect(document.body.dataset.wukongEmpty).toBeUndefined()
+
+    dispose()
+    expect(document.body.dataset.wukongEmpty).toBeUndefined()
+  })
+
+  it('dispose 时移除 data-wukong-empty（即使空会话态仍在）', () => {
+    document.body.insertAdjacentHTML('beforeend', "<div data-phase='hero'></div>")
+    const { ctx, dispose } = fakeCtx()
+    apply(ctx as never)
+    expect(document.body.dataset.wukongEmpty).toBe('')
+    dispose()
+    expect(document.body.dataset.wukongEmpty).toBeUndefined()
   })
 
   it('产品已有 theme-color meta 时同步为 Void 色，dispose 后恢复原值', () => {

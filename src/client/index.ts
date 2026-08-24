@@ -7,6 +7,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { createContractEngine, isEmptySession, type SkinState } from './contract.ts'
 import { createCover } from './cover.ts'
+import { createStage } from './stage.ts'
 import { WK_ICON } from './art.generated.ts'
 import './wukong.module.css'
 
@@ -23,13 +24,20 @@ export function apply(ctx: Context): void {
   let themeColorMeta: HTMLMetaElement | null = null
   let previousThemeColor: string | undefined
 
+  const { stage, setPose } = createStage()
   const onState = (state: SkinState): void => {
     body.dataset.wukongState = state
+    setPose(state)
   }
   const engine = createContractEngine(body, onState)
 
   const { cover, setVisible } = createCover()
-  const syncCover = (): void => setVisible(isEmptySession(body))
+  const syncCover = (): void => {
+    const empty = isEmptySession(body)
+    setVisible(empty)
+    if (empty) body.dataset.wukongEmpty = ''
+    else delete body.dataset.wukongEmpty
+  }
 
   ctx.effect(() => () => {
     engine.dispose()
@@ -37,6 +45,7 @@ export function apply(ctx: Context): void {
     themeColorObserver?.disconnect()
     delete body.dataset.dshWukong
     delete body.dataset.wukongState
+    delete body.dataset.wukongEmpty
     ownedNodes.forEach(node => node.remove())
     if (themeColorMeta?.isConnected && themeColorMeta.content === SKIN_CHROME_COLOR) {
       themeColorMeta.content = previousThemeColor ?? ''
@@ -58,6 +67,9 @@ export function apply(ctx: Context): void {
 
   ownedNodes.add(cover)
   body.prepend(cover)
+
+  ownedNodes.add(stage)
+  body.append(stage)
 
   /* 若产品页面已有 theme-color meta（PWA 标题栏/移动状态栏），则恒写为 Void；
      产品没有该 meta 时皮肤不代为注入。 */

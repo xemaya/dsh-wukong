@@ -190,3 +190,81 @@
   font-size: 42px; letter-spacing: 0.12em; line-height: 1.02;
   color: var(--wk-gold2); text-shadow: 0 4px 20px rgba(0,0,0,.62);
 }
+
+/* ===== 角色舞台（P1）===== */
+.stage {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: var(--wk-stage-w, 380px);
+  height: min(86vh, 1100px);
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.stagePose {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.45));
+}
+.stagePose[data-active] {
+  opacity: 1;
+}
+
+/* 空会话（土地庙封面）时封面即主视觉，舞台退场 */
+:global(body[data-wukong-empty]) .stage {
+  display: none;
+}
+
+/* 安全区：≥1024 时主内容给舞台让出轨道宽（选择器来自 afterglow 已验证面） */
+@media (min-width: 1024px) {
+  :global(body[data-dsh-wukong] [data-chat-flow]) {
+    padding-right: calc(var(--wk-stage-w, 380px) * 0.72);
+  }
+}
+
+/* 四档响应式 */
+@media (min-width: 1440px) {
+  :global(body[data-dsh-wukong]) { --wk-stage-w: 380px; }
+}
+@media (min-width: 1024px) and (max-width: 1439px) {
+  :global(body[data-dsh-wukong]) { --wk-stage-w: 280px; }
+  .stage { height: min(70vh, 820px); }
+  .stagePose { object-fit: cover; object-position: top center; } /* 半身裁切 */
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  :global(body[data-dsh-wukong]) { --wk-stage-w: 132px; }
+  .stage {
+    height: 132px;
+    width: 132px;
+    right: 10px;
+    bottom: 96px;
+    border-radius: 50%;
+    border: 1px solid var(--wk-line);
+    background: var(--wk-ink);
+  }
+  .stagePose { object-fit: cover; object-position: top center; } /* 胸像 */
+}
+@media (max-width: 767px) {
+  :global(body[data-dsh-wukong]) { --wk-stage-w: 88px; }
+  .stage {
+    height: 88px;
+    width: 88px;
+    right: 8px;
+    bottom: 88px;
+    border-radius: 50%;
+    border: 1px solid var(--wk-line);
+    background: var(--wk-ink);
+  }
+  .stagePose { object-fit: cover; object-position: top center; } /* 名牌头像 */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stagePose { transition: none; }
+}
