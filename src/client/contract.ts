@@ -22,6 +22,11 @@ export const CHOICE_SELECTOR = '[data-question-key], [data-plan-review-key], [da
 export const RUNNING_SELECTOR = "[data-chat-flow] [data-state='running'], [data-chat-flow] > [role='status']"
 export const ERROR_SELECTOR = "[data-chat-flow] [data-tool][data-state='error']"
 const TODO_ITEM_SELECTOR = "[data-testid='todo-panel'] li[data-status]"
+/* 产品自身对"无会话/空会话"的规范信号（ConversationRoot 的 resident phase）：
+   'hero' 涵盖冷启动未选会话与已知/已判定为空的会话；'settling' 是尚未判定
+   的加载中态（刻意不算空，避免对老会话的加载闪一下封面）；'active' 是有内容
+   的会话。产品自身 e2e 用例即以 [data-phase='hero'] 作为该态的判定依据。 */
+const HERO_PHASE_SELECTOR = "[data-phase='hero']"
 
 export interface ContractEngine {
   sync(): void
@@ -107,4 +112,13 @@ export function createContractEngine(
       if (timer !== undefined) clearTimeout(timer)
     },
   }
+}
+
+/* 土地庙：空会话（尚无任何回合内容）才展示封面。发现步骤证伪了缺省假设
+   （[data-chat-flow] 是否存在/是否有子节点）——产品自己已经有更准确的信号：
+   ConversationRoot 的 data-phase='hero'，同时覆盖"未选会话"与"已判定为空
+   的会话"两种情况，且在尚未判定完成的加载态（'settling'）上刻意不算空，
+   避免对老会话的加载过程闪一下封面。 */
+export function isEmptySession(root: ParentNode): boolean {
+  return root.querySelector(HERO_PHASE_SELECTOR) !== null
 }

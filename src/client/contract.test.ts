@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createContractEngine, STATE_LABELS, type SkinState } from './contract.ts'
+import { createContractEngine, isEmptySession, STATE_LABELS, type SkinState } from './contract.ts'
 
 const flow = (inner: string): string => `<div data-chat-flow>${inner}</div>`
 const runningTool = '<div data-tool data-state="running"></div>'
@@ -106,5 +106,29 @@ describe('createContractEngine', () => {
     expect(STATE_LABELS).toEqual({
       dialogue: '问道', choice: '岔路', battle: '降妖', alert: '受创', clear: '功成',
     })
+  })
+})
+
+describe('isEmptySession', () => {
+  let root: HTMLElement
+
+  beforeEach(() => {
+    root = document.createElement('div')
+  })
+
+  it('无 data-phase 节点 → false（未知即不展示封面）', () => {
+    expect(isEmptySession(root)).toBe(false)
+  })
+
+  it("data-phase='active' 或 'settling' → false（会话有内容或尚在判定中）", () => {
+    root.innerHTML = "<div data-phase='active'></div>"
+    expect(isEmptySession(root)).toBe(false)
+    root.innerHTML = "<div data-phase='settling'></div>"
+    expect(isEmptySession(root)).toBe(false)
+  })
+
+  it("data-phase='hero' → true（产品自身的 New Session/空会话信号）", () => {
+    root.innerHTML = "<div data-phase='hero'></div>"
+    expect(isEmptySession(root)).toBe(true)
   })
 })

@@ -143,3 +143,45 @@
   outline: 1px solid var(--wk-gold2);
   outline-offset: 2px;
 }
+
+/* --------------------------------------------------------- 土地庙封面层 */
+
+/* z-index: 0 是保守占位——静态走查未能验证产品层叠上下文（composer/侧栏
+   等未知的 z-index/stacking context），Task 7 playtest 须在真实 DOM 里确认
+   封面确实垫在所有产品交互元素之下。pointer-events: none 是硬约束：封面
+   任何时候都不得拦截点击。 */
+.cover {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cover[data-visible] { opacity: 1; }
+.coverArt {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  filter: contrast(1.03) brightness(0.9);
+}
+.cover::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(4,3,3,.68) 0%, rgba(4,3,3,.26) 34%, rgba(4,3,3,.08) 56%, rgba(4,3,3,.2) 100%),
+    linear-gradient(180deg, rgba(3,2,2,.08) 0%, rgba(3,2,2,.02) 45%, rgba(3,2,2,.34) 73%, rgba(3,2,2,.88) 100%);
+}
+.coverCopy {
+  position: absolute; left: 42px; top: 50%;
+  transform: translateY(-58%); max-width: 430px;
+}
+.coverKicker {
+  display: inline-flex; padding: 6px 9px; border-radius: 999px;
+  border: 1px solid var(--wk-line); background: rgba(8,6,5,.56);
+  font-size: 9px; color: #b7a186; margin-bottom: 10px;
+}
+.coverTitle {
+  margin: 0; font-family: 'STKaiti', 'KaiTi', serif;
+  font-size: 42px; letter-spacing: 0.12em; line-height: 1.02;
+  color: var(--wk-gold2); text-shadow: 0 4px 20px rgba(0,0,0,.62);
+}

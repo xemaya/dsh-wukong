@@ -5,7 +5,8 @@
  * disposer 完整还原。状态由 contract.ts 从产品真实 DOM 证据推导。
  */
 import type { Context } from '@deepseek-ai/cordis'
-import { createContractEngine, type SkinState } from './contract.ts'
+import { createContractEngine, isEmptySession, type SkinState } from './contract.ts'
+import { createCover } from './cover.ts'
 import { WK_ICON } from './art.generated.ts'
 import './wukong.module.css'
 
@@ -26,6 +27,9 @@ export function apply(ctx: Context): void {
     body.dataset.wukongState = state
   }
   const engine = createContractEngine(body, onState)
+
+  const { cover, setVisible } = createCover()
+  const syncCover = (): void => setVisible(isEmptySession(body))
 
   ctx.effect(() => () => {
     engine.dispose()
@@ -52,6 +56,9 @@ export function apply(ctx: Context): void {
   ownedNodes.add(favicon)
   document.head.append(favicon)
 
+  ownedNodes.add(cover)
+  body.prepend(cover)
+
   /* 若产品页面已有 theme-color meta（PWA 标题栏/移动状态栏），则恒写为 Void；
      产品没有该 meta 时皮肤不代为注入。 */
   const syncSystemChrome = (): void => {
@@ -71,14 +78,21 @@ export function apply(ctx: Context): void {
 
   /* 皮肤自有节点的变更绝不能再触发 sync——那个反馈环会 livelock 页面。
      attributes 分支与 childList 分支必须用同一条 skin-owned 过滤：未来皮肤自有
-     节点（P2 HUD 等）若带 data-state，翻转它不能绕过防护。 */
+     节点（P2 HUD 等）若带 data-state，翻转它不能绕过防护。
+     data-phase 是 ConversationRoot 根节点的 React 受控属性（hero/settling/
+     active），phase 切换时只触发一次 attributes 记录，不伴随 childList 变更
+     ——必须与 data-state 同列入 attributeFilter，否则封面永远不会随真实会话
+     状态更新（只会停在挂载时的初值）。 */
   observer = new MutationObserver((records) => {
     let relevant = false
+    let coverRelevant = false
     for (const record of records) {
       const skinOwnedTarget = record.target instanceof Element
         && record.target.closest('[data-skin-owner]') !== null
       if (record.type === 'attributes') {
-        if (record.attributeName === 'data-state' && !skinOwnedTarget) relevant = true
+        if (skinOwnedTarget) continue
+        if (record.attributeName === 'data-state') relevant = true
+        if (record.attributeName === 'data-phase') coverRelevant = true
         continue
       }
       if (skinOwnedTarget) continue
@@ -86,16 +100,21 @@ export function apply(ctx: Context): void {
       const skinOwned = nodes.every(node => (
         node instanceof Element && node.getAttribute('data-skin-owner') === SKIN_OWNER
       ))
-      if (nodes.length > 0 && !skinOwned) relevant = true
+      if (nodes.length > 0 && !skinOwned) {
+        relevant = true
+        coverRelevant = true
+      }
     }
     if (relevant) engine.sync()
+    if (relevant || coverRelevant) syncCover()
   })
   observer.observe(body, {
     attributes: true,
-    attributeFilter: ['data-state'],
+    attributeFilter: ['data-state', 'data-phase'],
     childList: true,
     subtree: true,
   })
 
   engine.sync()
+  syncCover()
 }
