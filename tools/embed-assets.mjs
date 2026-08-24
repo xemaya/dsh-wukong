@@ -12,34 +12,8 @@ import { resolve, dirname, extname } from 'node:path'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
 const ASSETS = [
-  ['AG_BG_LIGHT', 'bg-light.webp'],
-  ['AG_BG_OPS_DIALOGUE', 'bg-ops-dialogue.webp'],
-  ['AG_BG_OPS_EXECUTION', 'bg-ops-execution.webp'],
-  ['AG_POSE_DIALOGUE', 'pose-dialogue.webp'],
-  ['AG_POSE_EXECUTION', 'pose-execution.webp'],
-  ['AG_POSE_CHOICE', 'pose-choice.webp'],
-  ['AG_POSE_RECOVERY', 'pose-recovery.webp'],
-  ['AG_POSE_CLEAR', 'pose-clear.webp'],
-  ['AG_BUST_DIALOGUE', 'bust-dialogue.webp'],
-  ['AG_BUST_EXECUTION', 'bust-execution.webp'],
-  ['AG_BUST_CHOICE', 'bust-choice.webp'],
-  ['AG_BUST_RECOVERY', 'bust-recovery.webp'],
-  ['AG_BUST_CLEAR', 'bust-clear.webp'],
-  ['AG_FACE_OPEN', 'face-open.webp'],
-  ['AG_FACE_BLINK', 'face-blink.webp'],
-  ['AG_FACE_TALK_A', 'face-talk-a.webp'],
-  ['AG_FACE_TALK_B', 'face-talk-b.webp'],
-  ['AG_ENV_RAIN', 'env-rain.webp'],
-  ['AG_ENV_LIGHT_MASK', 'env-light-mask.webp'],
-  ['AG_VFX_SLASH', 'vfx-slash.webp'],
-  ['AG_VFX_HIT', 'vfx-hit.webp'],
-  ['AG_VFX_SHIELD_BREAK', 'vfx-shield-break.webp'],
-  ['AG_VFX_CLEAR', 'vfx-clear.webp'],
-  ['AG_ICON', 'icon.png'],
-  ['AG_ELEMENT_WIND', 'element-wind.webp'],
-  ['AG_ELEMENT_FIRE', 'element-fire.webp'],
-  ['AG_ELEMENT_ICE', 'element-ice.webp'],
-  ['AG_ELEMENT_ELECTRO', 'element-electro.webp'],
+  ['WK_COVER', 'cover-tianming.png'],
+  ['WK_ICON', 'icon.png'],
 ]
 
 const MIME = { '.webp': 'image/webp', '.png': 'image/png' }
@@ -51,17 +25,5 @@ for (const [name, file] of ASSETS) {
   out += `export const ${name} = 'data:${mime};base64,${data.toString('base64')}'\n`
 }
 
-const emblemSvg = await readFile(resolve(root, 'assets-gen', 'tool-emblems.svg'), 'utf8')
-const style = emblemSvg.match(/<style>([\s\S]*?)<\/style>/)?.[1] ?? ''
-const groups = [...emblemSvg.matchAll(/<g id="([\w-]+)" transform="translate\([^)]*\)">([\s\S]*?)<\/g>/g)]
-if (groups.length === 0) throw new Error('tool-emblems.svg: no extractable groups')
-out += 'export const AG_EMBLEMS: Record<string, string> = {\n'
-for (const [, id, inner] of groups) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><style>${style}</style></defs>${inner}</svg>`
-  const uri = `data:image/svg+xml,${encodeURIComponent(svg).replace(/'/g, '%27')}`
-  out += `  ${JSON.stringify(id)}: '${uri}',\n`
-}
-out += '}\n'
-
 await writeFile(resolve(root, 'src/client/art.generated.ts'), out)
-console.log(`embedded ${ASSETS.length} assets + ${groups.length} emblems`)
+console.log(`embedded ${ASSETS.length} assets`)
