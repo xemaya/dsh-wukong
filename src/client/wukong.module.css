@@ -146,14 +146,19 @@
 
 /* --------------------------------------------------------- 土地庙封面层 */
 
-/* z-index: 0 是保守占位——静态走查未能验证产品层叠上下文（composer/侧栏
-   等未知的 z-index/stacking context），Task 7 playtest 须在真实 DOM 里确认
-   封面确实垫在所有产品交互元素之下。pointer-events: none 是硬约束：封面
-   任何时候都不得拦截点击。 */
+/* Task 7 playtest 实测（真实 DOM）：z-index: 0 是不够的——产品 hero 页把
+   headline + composer 一起包在 composerHero 容器里（position: relative;
+   z-index: 1），且产品根节点自身也提升为层叠上下文，两者都会整体盖过
+   z-index: 0 的封面，导致封面完全不可见。z-index: 1 与 composerHero 打平，
+   层叠顺序按 DOM 序裁决——封面是 body 的第一个子节点（先插入），
+   composerHero 在其后挂载，因此 composerHero 仍然稳定地压在封面之上，
+   封面则稳定压过页面其余（未声明层叠上下文）的内容，实测截图见
+   screenshots/shot-cover.png。pointer-events: none 是硬约束：封面任何
+   时候都不得拦截点击。 */
 .cover {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
