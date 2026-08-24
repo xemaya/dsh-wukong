@@ -7,10 +7,11 @@
 - 概念稿 `/Users/huanghaibin/Downloads/dsh-wukong-black-myth-cover-final.html`（视觉 token、New Session 封面、克制工作态）
 - `~/Workspace/deepseek/dsh-afterglow`（皮肤插件合同、诚实状态机、游戏感优化经验 `docs/AFTERGLOW_GAME_FEEL_OPTIMIZATION.md`）
 
-## 1. 核心叙事：你执笔，大圣执棍
+## 1. 核心叙事：你执笔，天命人执棍
 
-用户是天命人，下达意志；悟空是化身，替用户降妖。每个任务是一场「降妖」，
-每个工具调用是一记棍招。悟空五态立绘常驻右侧角色轨道，是可见的 agent 伙伴
+黑神话的主角是**天命人**（不是悟空/大圣，那是故事背景里的旧日齐天大圣）。
+用户是执笔者，下达意志；天命人是化身，替用户降妖。每个任务是一场「降妖」，
+每个工具调用是一记棍招。天命人五态立绘常驻右侧角色轨道，是可见的 agent 伙伴
 （否决概念稿「强角色只出现在 New Session」的克制路线——用户已确认）。
 
 概念稿保留的部分：全屏横版封面 + 「直面天命」hero 的 New Session、
@@ -25,7 +26,7 @@ DOM 信号，不伪造任何进度。
 | 状态 | 命名 | DSH 真实信号 | 呈现 |
 |---|---|---|---|
 | Dialogue | 问道 | 空闲对话 | 盘坐/拄棍待机立绘，冷月青灰场景，安静水墨 |
-| Choice | 岔路 | `[data-question-key]` / `[data-plan-review-key]` / `[data-approval-key]` | 场景退暗，选项变成编号「签文/岔路」卡，悟空抱棍侧目望向选项 |
+| Choice | 岔路 | `[data-question-key]` / `[data-plan-review-key]` / `[data-approval-key]` | 场景退暗，选项变成编号「签文/岔路」卡，天命人抱棍侧目望向选项 |
 | Execution | 降妖 | `[data-chat-flow]` 内工具行 `data-state='running'` 或回合状态行 `[role='status']` | 挥棍姿态，场景光转余烬色，顶部战斗 HUD |
 | Recovery | 受创 | 工具行翻转为 `data-state='error'`（仅当前回合新增） | 单膝受击立绘，一次性金甲碎裂 + 短震动，错误信息保持可读 |
 | Clear | 功成 | 战斗态自然结束且无新错误 | 立棍收势，金箍光环一次性扩散后回落 |
@@ -44,7 +45,7 @@ DOM 信号，不伪造任何进度。
   出错清零。这是 afterglow「行动链菱形」的换代——连击/清零规则让成功链条有
   积累感、失败有代价感。数据源只有真实工具行状态。
 - **棍势三式 = reasoning effort**：戳棍势（low）/ 立棍势（medium）/
-  劈棍势（high）。切换走产品原生菜单，呈现为架势切换 + 悟空持棍姿势微调。
+  劈棍势（high）。切换走产品原生菜单，呈现为架势切换 + 天命人持棍姿势微调。
 - **披挂 = 模型选择**：模型选择器呈现为「披挂」装备槽（如意金箍棒槽位），
   选项从产品原生菜单动态读取，不写死模型名，不生成虚假可用状态。
 - **定身术 = 停止**：用户点 Stop 时播一次性金色定身圈动画，HUD 冻结定格。
@@ -143,11 +144,11 @@ src/client/
 
 | 文件 | 内容 | 规格 |
 |---|---|---|
-| `wukong-dialogue-master.png` | 盘坐/拄棍问道待机 | 透明竖幅，高 ≥1600px |
-| `wukong-choice-master.png` | 抱棍侧目岔路姿势 | 同上 |
-| `wukong-execution-master.png` | 挥棍降妖姿势 | 同上 |
-| `wukong-recovery-master.png` | 单膝受创姿势 | 同上 |
-| `wukong-clear-master.png` | 立棍收势 | 同上 |
+| `tianming-dialogue-master.png` | 盘坐/拄棍问道待机 | 透明竖幅，高 ≥1600px |
+| `tianming-choice-master.png` | 抱棍侧目岔路姿势 | 同上 |
+| `tianming-execution-master.png` | 挥棍降妖姿势 | 同上 |
+| `tianming-recovery-master.png` | 单膝受创姿势 | 同上 |
+| `tianming-clear-master.png` | 立棍收势 | 同上 |
 
 ### 6.2 场景（P0–P1）
 
@@ -180,7 +181,7 @@ src/client/
 ### 8.1 视觉
 
 - 隐藏所有状态文字后，测试者仍能识别问道、岔路、降妖、受创四态。
-- 1600×900 与 1280×720 下，任何卡片不覆盖悟空的脸或主要手势。
+- 1600×900 与 1280×720 下，任何卡片不覆盖天命人的脸或主要手势。
 - 五张角色资产连续切换时头部、肩宽、落点稳定。
 
 ### 8.2 状态
