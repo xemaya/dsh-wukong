@@ -31,4 +31,17 @@ describe('createHud', () => {
     sync('battle', { currentTool: 'Bash', beads: 2 })
     expect(label.textContent).toBe(before)
   })
+
+  it('同值 sync 珠位零 mutation record（幂等写入，非"先删后写"）', () => {
+    const { hud, sync } = createHud()
+    sync('battle', { currentTool: 'Bash', beads: 2 })
+
+    const observer = new MutationObserver(() => {})
+    observer.observe(hud, { attributes: true, subtree: true, attributeFilter: ['data-lit'] })
+    sync('battle', { currentTool: 'Bash', beads: 2 })
+    const records = observer.takeRecords()
+    observer.disconnect()
+
+    expect(records).toHaveLength(0)
+  })
 })

@@ -38,8 +38,9 @@ export function createHud(): BattleHud {
       if (label.textContent !== text) label.textContent = text
       beadNodes.forEach((bead, index) => {
         const lit = index < t.beads
-        if (lit) bead.dataset.lit = ''
-        else delete bead.dataset.lit
+        const isLit = bead.dataset.lit !== undefined
+        if (lit && !isLit) bead.dataset.lit = ''
+        else if (!lit && isLit) delete bead.dataset.lit
       })
     },
   }
