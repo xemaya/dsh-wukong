@@ -244,11 +244,17 @@
 }
 @media (min-width: 768px) and (max-width: 1023px) {
   :global(body[data-dsh-wukong]) { --wk-stage-w: 132px; }
+  /* 布局避让实测（T6 修复轮，900x800 真机视口，todo 面板展开）：composer 控制行
+     （发送键所在的 .uV2eYG_row）顶边距视口底部 101px（699/800），与视口宽度
+     无关（该行随 composer 底部锚定，不随 --wk-stage-w 变化）。旧值 bottom:96px
+     的头像圆窗底边距视口底部只有 96px，比控制行顶边矮 5px，圆窗右下角实测与
+     发送键出现 5px×34px 的真实重叠（同一 bug 在胸像档的较轻表现）。改为
+     bottom:114px，令圆窗底边留出 13px 安全边距。 */
   .stage {
     height: 132px;
     width: 132px;
     right: 10px;
-    bottom: 96px;
+    bottom: 114px;
     border-radius: 50%;
     border: 1px solid var(--wk-line);
     background: var(--wk-ink);
@@ -265,11 +271,20 @@
 }
 @media (max-width: 767px) {
   :global(body[data-dsh-wukong]) { --wk-stage-w: 88px; }
+  /* 布局避让实测（T6 修复轮，playtest 报告 task-6-report.md §关切事项1，600x800
+     真机视口，todo 面板展开于 composer 上方后再点开三步已完成清单）：
+     composer 控制行（发送键所在的 .uV2eYG_row）顶边距视口底部固定 101px
+     （699/800，与 --wk-stage-w、视口宽度均无关，只随 composer 自身锚定）。
+     旧值 bottom:88px 时头像圆窗底边距视口底部只有 88px，比控制行顶边矮 13px，
+     实测圆窗右下角与发送键出现 13px×34px 的真实重叠区域（box-model 层面；
+     该重叠此刻恰好被 composer 自身更高的 z-index 覆盖着未必总能视觉盖住，
+     不应依赖这层巧合）。改为 bottom:120px，令圆窗底边留出 19px 安全边距，
+     两档（本档 + 上方 768-1023 胸像档）统一按同一控制行基准量出各自安全值。 */
   .stage {
     height: 88px;
     width: 88px;
     right: 8px;
-    bottom: 88px;
+    bottom: 120px;
     border-radius: 50%;
     border: 1px solid var(--wk-line);
     background: var(--wk-ink);

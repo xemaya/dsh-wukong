@@ -13,13 +13,18 @@ describe('stanceFor', () => {
 describe('createLoadout', () => {
   afterEach(() => { document.body.innerHTML = '' })
 
-  const mountSlot = (title: string): void => {
+  // 真实产品 DOM 形状（见 task-6-report.md）：模型名与推理等级分别渲染在两个
+  // 无分隔符的 <span> 里（textContent 拼接后没有分隔符），分隔符 "·" 只出现在
+  // trigger 的 title 属性里。
+  const mountSlot = (model: string, effort?: string): void => {
+    const title = effort === undefined ? model : `${model} · ${effort}`
+    const effortSpan = effort === undefined ? '' : `<span class="_7KE1Ra_triggerEffort">${effort}</span>`
     document.body.innerHTML = `<div data-slot="conversation.input.model">
-      <button class="x_trigger_x">${title}</button></div>`
+      <button class="_7KE1Ra_trigger" title="${title}"><span class="_7KE1Ra_triggerLabel">${model}</span>${effortSpan}</button></div>`
   }
 
-  it('sync 从原生触发器读出模型与棍势', () => {
-    mountSlot('DeepSeek R1 · high')
+  it('sync 从原生触发器 title 属性读出模型与棍势', () => {
+    mountSlot('DeepSeek R1', 'high')
     const { chip, sync } = createLoadout()
     sync()
     expect(chip.textContent).toContain('DeepSeek R1')
@@ -27,7 +32,7 @@ describe('createLoadout', () => {
   })
 
   it('点击转发原生触发器', () => {
-    mountSlot('M · low')
+    mountSlot('M', 'low')
     const { chip, sync } = createLoadout()
     sync()
     const trigger = document.querySelector<HTMLButtonElement>("[data-slot='conversation.input.model'] button")!

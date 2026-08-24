@@ -34,13 +34,26 @@ export function createLoadout(): Loadout {
     chip,
     sync(): void {
       const trigger = document.querySelector<HTMLButtonElement>(TRIGGER_SELECTOR)
-      const raw = trigger?.textContent?.trim() ?? ''
       let text = '披挂 —'
-      if (raw !== '') {
-        const [model, effort] = raw.split(/\s*[·•|]\s*/, 2)
-        text = effort === undefined
-          ? `披挂 ${model}`
-          : `披挂 ${model} · ${stanceFor(effort)}`
+      if (trigger != null) {
+        // 真实 DOM 把模型名与推理等级分别渲染在两个无分隔符的 <span> 里
+        // （textContent 拼接后没有分隔符），分隔符 "·" 只出现在 trigger 的
+        // title 属性里（如 "DeepSeek-V4-Flash · High"）。优先解析 title；
+        // 只有 title 缺失或没有分隔符时才退回 textContent 的旧逻辑。
+        const title = trigger.getAttribute('title')?.trim() ?? ''
+        const titleParts = title.split(/\s*[·•|]\s*/, 2)
+        if (title !== '' && titleParts.length === 2) {
+          const [model, effort] = titleParts
+          text = `披挂 ${model} · ${stanceFor(effort)}`
+        } else {
+          const raw = trigger.textContent?.trim() ?? ''
+          if (raw !== '') {
+            const [model, effort] = raw.split(/\s*[·•|]\s*/, 2)
+            text = effort === undefined
+              ? `披挂 ${model}`
+              : `披挂 ${model} · ${stanceFor(effort)}`
+          }
+        }
       }
       if (chip.textContent !== text) chip.textContent = text
     },
