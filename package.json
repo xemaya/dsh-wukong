@@ -44,6 +44,7 @@
     "src",
     "tools",
     "assets-gen",
+    "preview",
     "README.md"
   ]
 }

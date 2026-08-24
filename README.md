@@ -52,10 +52,9 @@ dsh plugin --profile web remove @dsh-external/dsh-wukong
 > livelock（完全卡死，DevTools 也无法执行任何脚本）。若本机已装有其他
 > 皮肤（如 dsh-afterglow），请先卸载它再安装本皮肤。
 
-## P0/P1 状态
+## 项目状态：P0–P3 完成
 
-P0、P1 均已完成（骨架 + 可安装 + 五态状态机 + New Session 封面 + 角色舞台 + 场景双光照 +
-水墨转场 + 真机 playtest）：
+### P0 / P1 —— 骨架、角色舞台、场景与转场
 
 - 骨架：`contract.ts` 五态状态机（含历史错误基线，重载旧会话不会误报"受创"）、
   `--wk-*` token、New Session 封面页（"直 面 天 命"）。
@@ -68,12 +67,10 @@ P0、P1 均已完成（骨架 + 可安装 + 五态状态机 + New Session 封面
   `art.generated.ts` 由 `tools/embed-assets.mjs` 自动生成，无需手动改动。
 - 真机 playtest（Playwright MCP 驱动本机 dsh web GUI）：会话中立绘/背景随真实工具调用
   状态切换、四档响应式实测、卸载→刷新→全还原→重装恢复全链路验证通过；胸像/名牌头像档
-  的圆形裁切窗通过 `transform: scale` 二次放大聚焦头部（P1 用裁切顶数，专门胸像半身图
-  留给 P3）。
+  的圆形裁切窗通过 `transform: scale` 二次放大聚焦头部。
 
-## P2 状态
+### P2 —— 棍势 HUD / 岔路签文 / 披挂条 / 章回 / 影神图
 
-P2 已完成（棍势连击 HUD + 岔路签文 + 披挂条 + 章回 todo + 影神图 trajectory），
 真机 playtest 见 `.superpowers/sdd/2026-08-25-dsh-wukong-p2/task-6-report.md`：
 
 - 棍势 HUD：`hud.ts` 仅 battle/alert 可见的顶部胶囊，招式名 + 四珠连击条，数据全部
@@ -90,30 +87,71 @@ P2 已完成（棍势连击 HUD + 岔路签文 + 披挂条 + 章回 todo + 影�
   `.click()`，不做任何克隆提交；1.5s 轮询兜底 + mutation observer 双路刷新。真机
   验证：点击 chip 确实打开产品原生"模型/推理等级"菜单，原生菜单换挡（Off/High/
   Max）后 chip 文案在 1.5s 内（实测为下一次 DOM 变更即时触发，远快于轮询上限）刷新。
-  **已知缺陷**（逻辑问题，未在本任务修复，见 task-6-report.md）：产品原生模型触发器
-  的模型名与推理等级分别渲染在两个无分隔文本的 `<span>` 里（`textContent` 直接拼接
-  为 `DeepSeek-V4-FlashMax`，分隔符只存在于触发器的 `title` 属性），导致
-  `stanceFor()` 的"棍势三式"从未在 chip 上显示——chip 目前只显示拼接后的模型名，
-  丢失棍势后缀。单元测试因 mock DOM 把分隔符写进了同一个文本节点而未捕获此问题。
+  模型名/棍势等级从原生触发器的 `title` 属性解析（`textContent` 本身无分隔符，见
+  下方"已知限制"）。
 - 章回 todo：`[data-testid='todo-panel'] li[data-status]` 前缀"第N回"（CJK 数字
   计数器），进行中=`--wk-ember`、完成=`--wk-jade`。真机验证：真实 3 步 todo 计划
   执行全程回目编号与灯色随 `data-status` 变化（completed 呈现为 jade；in-progress
   ember 色通过 computed style 直接验证）。
 - 影神图 trajectory：`[data-trajectory-scroll]` 卷轴纸纹渐变，`[data-timeline-span]`
-  内 user/tool/subtool 三类分级左边线（金/古铜/浅古铜），`[data-error='true']` 转红。
-  真机验证：真实 trajectory 页各字段 computed style 均匹配设计值；该边线画在顶部
+  内 user/tool/subtool 三类分级左边线（金/古铜/浅古铜），`[data-timeline-span][data-error='true']`
+  转红。真机验证：真实 trajectory 页各字段 computed style 均匹配设计值；该边线画在顶部
   8px 高的迷你时间条上，视觉上是细节强调而非大面积色块，属设计既有形态。
-- **已知问题（P1 遗留，非本轮引入，未修复）**：768px 以下"名牌头像"档舞台头像
-  （固定于 `right:8px; bottom:88px`）在产品原生 todo 面板（`[data-testid=
-  'todo-panel']`）展开于 composer 上方时，会与发送按钮视觉重叠。P1 playtest 未覆盖
-  "composer 上方有 todo 面板"这一真实场景，故未被发现；stage 定位 CSS 不在本轮
-  P2 任务范围内，留待后续任务处理。
-- P3（棍势特效 VFX / 定身术 Stop 呈现 / 专门胸像美术）不在本轮范围内。
+
+### P3 —— 定身术与全篇加固收官
+
+- 定身术：`vfx.ts` 的 `createOneShot` 通用一次性节点工厂（由水墨转场重构提炼）
+  派生出 `createFreezeRing`——用户点击 Stop 且当前处于降妖态时，播放 900ms
+  一次性金色定身圈定格动画，HUD 珠位同时追加 `wkBeadPulse` 点亮脉冲、受创态
+  HUD 追加 `wkHudShake` 一次性震动，均只在属性翻转瞬间播放一次，
+  `prefers-reduced-motion` 下全部关闭。Stop 按钮无稳定 data 钩子（详见
+  `.superpowers/sdd/2026-08-25-dsh-wukong-p3/task-1-report.md` 的选择器发现记录），
+  改用 `[data-composer-seat]` 祖先限定 + `aria-label` 正则 `/stop|停止/i` 在捕获
+  阶段匹配点击。
+- 加固批：
+  - 影神图 error 选择器收紧为 `[data-timeline-span][data-error='true']`，避免误配
+    非时间线节点上偶然同名的 `data-error` 属性。
+  - 四档响应式舞台改写为 mobile-first / min-width 单向级联（不带 query 的基础规则
+    即 <768 名牌头像档，`768px`/`1024px`/`1440px` 三个 min-width 断点逐级显式覆盖，
+    1024px 起显式重置 border-radius/border/background/transform 回全身立绘值），
+    消除旧版 max-width 分档写法潜在的分数像素缝隙；每档行为与旧实现逐一对照一致。
+  - 披挂条轮询 `sync()` 增加 `chip.isConnected` 早退，chip 未挂载（尚未找到
+    composer 座位，或皮肤已 dispose）时不做无意义的 DOM 读写。
+  - `apply()` 补全 dispose 全清单单测：确认 dispose 后 body 无任何
+    `[data-skin-owner]` 残留节点，清空的轮询定时器在之后也不再产生任何可观察
+    副作用。
+- 测试与构建：`pnpm test` 全绿 55 条用例（7 个测试文件）；`pnpm build` 通过。
+
+## 已知限制
+
+以下限制均为设计取舍或与上游 DOM 结构耦合导致的已知边界，非遗留 bug，记录以便
+后续迭代参考：
+
+- **披挂条模型名解析依赖 title 分隔符**：`loadout.ts` 优先解析原生模型触发器
+  `title` 属性里的 `·`/`•`/`|` 分隔符拆出"模型 + 推理等级"；若上游把 `title`
+  格式改为不含这三种分隔符之一，或分隔后不是恰好两段，会回退到 `textContent`
+  拼接解析——但 `textContent` 本身没有分隔符，无法可靠拆出棍势等级，此时 chip
+  只会显示拼接后的模型名，丢失棍势后缀。
+- **`seenErrors` 按元素身份判重**：`contract.ts` 用 `WeakSet<Element>` 记录
+  "已见过的错误行"做历史错误基线，前提是同一条错误消息在其生命周期内始终对应
+  同一个 DOM 节点。若产品的消息列表引入虚拟化（滚出视口即回收/复用 DOM 节点），
+  同一个 `Element` 可能先后代表不同的真实行，理论上可能出现新错误被误判为
+  "已见过"（漏报受创），或历史错误因节点复用被误判为"新增"（误报受创）。当前
+  产品 DOM 未观察到虚拟化，属潜在风险项而非已发生问题。
+- **choice（岔路）信号仅走 childList 路径**：`index.ts` 的 `MutationObserver`
+  只对 `attributeFilter: ['data-state', 'data-phase']` 的属性变更触发
+  `engine.sync()`；`[data-question-key]`/`[data-plan-review-key]`/
+  `[data-approval-key]` 的出现/消失目前都通过节点增删（`childList`）被捕获。
+  若上游未来改为在已存在的节点上翻转这三个属性而不是增删节点来表达岔路态，
+  皮肤不会捕捉到该信号。
+- **双皮肤同时安装会 livelock**：提示保留在上方"安装"小节——两个 `ui-skin-*`
+  皮肤插件同时启用会争抢同一套 DOM 观测/写入逻辑，实测导致页面主线程完全卡死；
+  皮肤本身未做也不打算做自动检测或互斥防护，依赖使用者自律（同一时间只装一个）。
 
 ## 开发
 
 ```sh
-pnpm test    # vitest，7 个测试文件、50 条用例（contract/cover/apply/stage/vfx/hud/loadout）
+pnpm test    # vitest，7 个测试文件、55 条用例（contract/cover/apply/stage/vfx/hud/loadout）
 pnpm build   # tsdown 构建 lib/（node 入口 + client bundle）
 ```
 
