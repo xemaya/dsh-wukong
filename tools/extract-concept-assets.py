@@ -1,8 +1,8 @@
-"""从概念稿 HTML 提取封面 data URI 到 assets-gen/（一次性工具）。"""
+"""从概念稿 HTML 提取封面 data URI 到 art-production/p0（一次性工具）。"""
 import base64, pathlib, re, sys
 
 src = pathlib.Path('/Users/huanghaibin/Downloads/dsh-wukong-black-myth-cover-final.html')
-out_dir = pathlib.Path(__file__).resolve().parent.parent / 'assets-gen'
+out_dir = pathlib.Path(__file__).resolve().parent.parent / 'art-production/p0'
 m = re.search(r'data:(image/[a-z+]+);base64,([A-Za-z0-9+/=]+)', src.read_text())
 if m is None:
     sys.exit('no data URI found in concept HTML')

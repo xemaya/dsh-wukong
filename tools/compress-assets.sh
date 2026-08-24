@@ -7,5 +7,5 @@ for p in dialogue choice execution recovery clear; do
 done
 cwebp -q 80 -m 6 art-production/p0/blackwind-dialogue-base.png -o assets-gen/bg-dialogue.webp
 cwebp -q 80 -m 6 art-production/p0/blackwind-execution-base.png -o assets-gen/bg-execution.webp
-cwebp -q 84 -m 6 assets-gen/cover-tianming.png -o assets-gen/cover.webp
+cwebp -q 84 -m 6 art-production/p0/cover-tianming.png -o assets-gen/cover.webp
 ls -la assets-gen/*.webp

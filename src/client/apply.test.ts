@@ -147,10 +147,12 @@ describe('apply', () => {
     const { ctx, dispose } = fakeCtx()
     apply(ctx as never)
     expect(document.body.style.getPropertyValue('background-image')).toContain('data:image/webp')
+    const dialogueBg = document.body.style.getPropertyValue('background-image')
     document.body.insertAdjacentHTML('beforeend',
       '<div data-chat-flow><div data-tool data-state="running"></div></div>')
     await new Promise(r => setTimeout(r, 50))
     const battleBg = document.body.style.getPropertyValue('background-image')
+    expect(battleBg).not.toBe(dialogueBg)
     expect(document.body.dataset.wukongState).toBe('battle')
     dispose()
     expect(document.body.style.getPropertyValue('background-image')).toBe('none')

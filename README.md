@@ -66,9 +66,11 @@ P0、P1 均已完成（骨架 + 可安装 + 五态状态机 + New Session 封面
 ## 开发
 
 ```sh
-pnpm test    # vitest，contract/cover/apply 三组用例
+pnpm test    # vitest，5 个测试文件、36 条用例（contract/cover/apply/stage/vfx）
 pnpm build   # tsdown 构建 lib/（node 入口 + client bundle）
 ```
+
+> dsh 插件 bundle 变更后需重启 `dsh --profile web` 进程才生效（无热重载）。
 
 ## 许可
 
