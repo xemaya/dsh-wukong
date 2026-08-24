@@ -12,6 +12,7 @@
   --wk-text2: #c7b6a0;
   --wk-line: rgba(211, 164, 91, 0.16);
 
+  /* 渐变为场景图加载前/缺失时的兜底；运行时内联 background-image 覆盖其上 */
   background:
     radial-gradient(circle at 50% 0%, rgba(116, 76, 40, 0.13), transparent 24%),
     linear-gradient(180deg, #050403, var(--wk-void));

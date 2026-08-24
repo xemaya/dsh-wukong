@@ -8,7 +8,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import { createContractEngine, isEmptySession, type SkinState } from './contract.ts'
 import { createCover } from './cover.ts'
 import { createStage } from './stage.ts'
-import { WK_ICON } from './art.generated.ts'
+import { WK_ICON, WK_BG_DIALOGUE, WK_BG_EXECUTION } from './art.generated.ts'
 import './wukong.module.css'
 
 const SKIN_OWNER = 'wukong'
@@ -24,10 +24,28 @@ export function apply(ctx: Context): void {
   let themeColorMeta: HTMLMetaElement | null = null
   let previousThemeColor: string | undefined
 
+  // 保存产品原内联背景值，供 disposer 还原
+  const previousBackground = new Map<string, string>()
+  for (const property of ['background-image', 'background-position', 'background-size', 'background-attachment', 'background-repeat']) {
+    previousBackground.set(property, body.style.getPropertyValue(property))
+  }
+
+  /* 黑风山场景：问道=冷月版；降妖/受创=余烬版。CSS 渐变仍在图层下方兜底。 */
+  const syncBackdrop = (): void => {
+    const state = body.dataset.wukongState
+    const lit = state === 'battle' || state === 'alert'
+    body.style.setProperty('background-image', `url(${lit ? WK_BG_EXECUTION : WK_BG_DIALOGUE})`)
+  }
+  body.style.setProperty('background-position', 'center center')
+  body.style.setProperty('background-size', 'cover')
+  body.style.setProperty('background-attachment', 'fixed')
+  body.style.setProperty('background-repeat', 'no-repeat')
+
   const { stage, setPose } = createStage()
   const onState = (state: SkinState): void => {
     body.dataset.wukongState = state
     setPose(state)
+    syncBackdrop()
   }
   const engine = createContractEngine(body, onState)
 
@@ -51,6 +69,9 @@ export function apply(ctx: Context): void {
       themeColorMeta.content = previousThemeColor ?? ''
     }
     if (document.title === SKIN_TITLE) document.title = originalTitle
+    for (const [property, value] of previousBackground) {
+      body.style.setProperty(property, value)
+    }
   }, 'ui-skin-wukong: presentation layer')
 
   body.dataset.dshWukong = ''
@@ -127,6 +148,7 @@ export function apply(ctx: Context): void {
     subtree: true,
   })
 
+  syncBackdrop()
   engine.sync()
   syncCover()
 }

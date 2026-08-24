@@ -142,6 +142,20 @@ describe('apply', () => {
     expect(document.body.dataset.wukongEmpty).toBeUndefined()
   })
 
+  it('场景背景随状态换光照，dispose 还原内联背景', async () => {
+    document.body.style.setProperty('background-image', 'none')  // 模拟产品原有内联值
+    const { ctx, dispose } = fakeCtx()
+    apply(ctx as never)
+    expect(document.body.style.getPropertyValue('background-image')).toContain('data:image/webp')
+    document.body.insertAdjacentHTML('beforeend',
+      '<div data-chat-flow><div data-tool data-state="running"></div></div>')
+    await new Promise(r => setTimeout(r, 50))
+    const battleBg = document.body.style.getPropertyValue('background-image')
+    expect(document.body.dataset.wukongState).toBe('battle')
+    dispose()
+    expect(document.body.style.getPropertyValue('background-image')).toBe('none')
+  })
+
   it('产品已有 theme-color meta 时同步为 Void 色，dispose 后恢复原值', () => {
     const meta = document.createElement('meta')
     meta.name = 'theme-color'
