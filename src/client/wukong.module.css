@@ -416,3 +416,19 @@
 :global(body[data-dsh-wukong]) :global([data-error='true']) {
   border-left-color: var(--wk-red);
 }
+
+/* ===== 披挂条（P2）===== */
+.loadoutChip {
+  height: 26px;
+  border: 1px solid var(--wk-line);
+  border-radius: 7px;
+  background: var(--wk-ink);
+  color: var(--wk-text2);
+  font-size: 10px;
+  padding: 0 9px;
+  cursor: pointer;
+}
+.loadoutChip:hover {
+  border-color: rgba(211, 164, 91, 0.4);
+  color: var(--wk-gold2);
+}

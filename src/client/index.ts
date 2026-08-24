@@ -8,6 +8,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import { createContractEngine, isEmptySession, readBattleTelemetry, type SkinState } from './contract.ts'
 import { createCover } from './cover.ts'
 import { createHud } from './hud.ts'
+import { createLoadout } from './loadout.ts'
 import { createStage } from './stage.ts'
 import { createInkTransition } from './vfx.ts'
 import { WK_ICON, WK_BG_DIALOGUE, WK_BG_EXECUTION } from './art.generated.ts'
@@ -16,6 +17,7 @@ import './wukong.module.css'
 const SKIN_OWNER = 'wukong'
 const SKIN_TITLE = 'DSH // 天命'
 const SKIN_CHROME_COLOR = '#080706'
+const COMPOSER_SEAT_SELECTOR = '[data-composer-seat]'
 
 export function apply(ctx: Context): void {
   const body = document.body
@@ -45,6 +47,7 @@ export function apply(ctx: Context): void {
 
   const { stage, setPose } = createStage()
   const { hud, sync: syncHud } = createHud()
+  const { chip: loadoutChip, sync: syncLoadout } = createLoadout()
   const ink = createInkTransition()
   ctx.effect(() => () => ink.dispose(), 'ui-skin-wukong: ink transition')
 
@@ -109,6 +112,18 @@ export function apply(ctx: Context): void {
   ownedNodes.add(hud)
   body.append(hud)
 
+  ownedNodes.add(loadoutChip)
+  /* 座内 append，绝不插在 React 兄弟之间；React 重渲染掉座位时重挂。 */
+  const seatLoadout = (): void => {
+    const seat = document.querySelector<HTMLElement>(COMPOSER_SEAT_SELECTOR)
+    if (seat === null) { loadoutChip.remove(); return }
+    if (loadoutChip.parentElement !== seat) seat.append(loadoutChip)
+    syncLoadout()
+  }
+  /* 触发器标题无可观察钩子（afterglow 同款问题）：慢轮询兜底 */
+  const loadoutPoll = setInterval(syncLoadout, 1500)
+  ctx.effect(() => () => clearInterval(loadoutPoll), 'ui-skin-wukong: loadout poll')
+
   /* 若产品页面已有 theme-color meta（PWA 标题栏/移动状态栏），则恒写为 Void；
      产品没有该 meta 时皮肤不代为注入。 */
   const syncSystemChrome = (): void => {
@@ -158,6 +173,7 @@ export function apply(ctx: Context): void {
     if (relevant) {
       engine.sync()
       refreshHud()
+      seatLoadout()
     }
     if (relevant || coverRelevant) syncCover()
   })
@@ -172,4 +188,5 @@ export function apply(ctx: Context): void {
   engine.sync()
   refreshHud()
   syncCover()
+  seatLoadout()
 }
