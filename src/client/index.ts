@@ -8,6 +8,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import { createContractEngine, isEmptySession, type SkinState } from './contract.ts'
 import { createCover } from './cover.ts'
 import { createStage } from './stage.ts'
+import { createInkTransition } from './vfx.ts'
 import { WK_ICON, WK_BG_DIALOGUE, WK_BG_EXECUTION } from './art.generated.ts'
 import './wukong.module.css'
 
@@ -42,10 +43,16 @@ export function apply(ctx: Context): void {
   body.style.setProperty('background-repeat', 'no-repeat')
 
   const { stage, setPose } = createStage()
+  const ink = createInkTransition()
+  ctx.effect(() => () => ink.dispose(), 'ui-skin-wukong: ink transition')
+
+  let stateBaselined = false
   const onState = (state: SkinState): void => {
     body.dataset.wukongState = state
     setPose(state)
     syncBackdrop()
+    if (stateBaselined) ink.play()
+    stateBaselined = true
   }
   const engine = createContractEngine(body, onState)
 
