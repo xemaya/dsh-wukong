@@ -12,8 +12,15 @@ import { resolve, dirname, extname } from 'node:path'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
 const ASSETS = [
-  ['WK_COVER', 'cover-tianming.png'],
+  ['WK_COVER', 'cover.webp'],
   ['WK_ICON', 'icon.png'],
+  ['WK_POSE_DIALOGUE', 'pose-dialogue.webp'],
+  ['WK_POSE_CHOICE', 'pose-choice.webp'],
+  ['WK_POSE_EXECUTION', 'pose-execution.webp'],
+  ['WK_POSE_RECOVERY', 'pose-recovery.webp'],
+  ['WK_POSE_CLEAR', 'pose-clear.webp'],
+  ['WK_BG_DIALOGUE', 'bg-dialogue.webp'],
+  ['WK_BG_EXECUTION', 'bg-execution.webp'],
 ]
 
 const MIME = { '.webp': 'image/webp', '.png': 'image/png' }
