@@ -52,7 +52,8 @@ export function apply(ctx: Context): void {
   ownedNodes.add(favicon)
   document.head.append(favicon)
 
-  /* 系统 chrome 色（PWA 标题栏/移动状态栏）恒为 Void。 */
+  /* 若产品页面已有 theme-color meta（PWA 标题栏/移动状态栏），则恒写为 Void；
+     产品没有该 meta 时皮肤不代为注入。 */
   const syncSystemChrome = (): void => {
     const meta = document.head.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
     if (meta === null) return
@@ -68,15 +69,19 @@ export function apply(ctx: Context): void {
   })
   syncSystemChrome()
 
-  /* 皮肤自有节点的变更绝不能再触发 sync——那个反馈环会 livelock 页面。 */
+  /* 皮肤自有节点的变更绝不能再触发 sync——那个反馈环会 livelock 页面。
+     attributes 分支与 childList 分支必须用同一条 skin-owned 过滤：未来皮肤自有
+     节点（P2 HUD 等）若带 data-state，翻转它不能绕过防护。 */
   observer = new MutationObserver((records) => {
     let relevant = false
     for (const record of records) {
+      const skinOwnedTarget = record.target instanceof Element
+        && record.target.closest('[data-skin-owner]') !== null
       if (record.type === 'attributes') {
-        if (record.attributeName === 'data-state') relevant = true
+        if (record.attributeName === 'data-state' && !skinOwnedTarget) relevant = true
         continue
       }
-      if (record.target instanceof Element && record.target.closest('[data-skin-owner]') !== null) continue
+      if (skinOwnedTarget) continue
       const nodes = [...record.addedNodes, ...record.removedNodes]
       const skinOwned = nodes.every(node => (
         node instanceof Element && node.getAttribute('data-skin-owner') === SKIN_OWNER
