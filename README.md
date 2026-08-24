@@ -121,6 +121,11 @@ dsh plugin --profile web remove @dsh-external/dsh-wukong
     `[data-skin-owner]` 残留节点，清空的轮询定时器在之后也不再产生任何可观察
     副作用。
 - 测试与构建：`pnpm test` 全绿 55 条用例（7 个测试文件）；`pnpm build` 通过。
+- 总验收 playtest（P0–P3 全量）：见
+  `.superpowers/sdd/2026-08-25-dsh-wukong-p3/task-4-report.md`。真机走查覆盖五态
+  视觉可辨、定身术（DOM 级同步验证）、珠位脉冲/受创震动一次性、
+  `prefers-reduced-motion`（CDP 模拟）、键盘全程 Tab（含披挂 chip 可聚焦可
+  Enter）、四档响应式含断点边界复核、卸载还原全清单、重拍 `shot-choice.png`。
 
 ## 已知限制
 
@@ -147,6 +152,15 @@ dsh plugin --profile web remove @dsh-external/dsh-wukong
 - **双皮肤同时安装会 livelock**：提示保留在上方"安装"小节——两个 `ui-skin-*`
   皮肤插件同时启用会争抢同一套 DOM 观测/写入逻辑，实测导致页面主线程完全卡死；
   皮肤本身未做也不打算做自动检测或互斥防护，依赖使用者自律（同一时间只装一个）。
+- **披挂条在 choice 态等待期间点击可能打不开原生菜单**：真机 playtest（P3 总验收）
+  发现，当产品原生 composer 因等待 `ask_user_question` 回答而进入"提交中/已禁用"
+  状态时，`[data-slot='conversation.input.model']` 内的原生模型触发器本身会被
+  产品折叠为 0×0 尺寸（非皮肤所为）；此时 chip 转发的 `.click()` 仍会把原生触发器
+  的 `aria-expanded` 置为 `true`（转发本身工作正常），但浮层菜单因为锚点元素尺寸
+  为零而无法定位，视觉上不可见。只在这一窄窗口内出现；composer 恢复空闲后点击
+  chip 可正常打开菜单（已用真机验证）。这是上游 composer 自身在等待用户回答时的
+  折叠行为，皮肤只做只读转发、不克隆菜单，因此无法在不违反"不做任何真实提交入口"
+  红线的前提下自行修复。
 
 ## 开发
 
