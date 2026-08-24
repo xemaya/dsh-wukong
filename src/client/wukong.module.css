@@ -1,3 +1,145 @@
 :global(body[data-dsh-wukong]) {
-  background: #080706;
+  --wk-void: #080706;
+  --wk-ink: #171411;
+  --wk-surface: #11100e;
+  --wk-gold: #b9813f;
+  --wk-gold2: #e0b167;
+  --wk-bronze: #7f5b35;
+  --wk-ember: #b95b2f;
+  --wk-red: #ad3e33;
+  --wk-jade: #7d9a87;
+  --wk-text: #eee5d8;
+  --wk-text2: #c7b6a0;
+  --wk-line: rgba(211, 164, 91, 0.16);
+
+  background:
+    radial-gradient(circle at 50% 0%, rgba(116, 76, 40, 0.13), transparent 24%),
+    linear-gradient(180deg, #050403, var(--wk-void));
+  color: var(--wk-text);
+}
+
+/* 执行/受创时背景转余烬光（场景art到位前用渐变占位，hook 已就绪） */
+:global(body[data-dsh-wukong][data-wukong-state='battle']),
+:global(body[data-dsh-wukong][data-wukong-state='alert']) {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(185, 91, 47, 0.18), transparent 30%),
+    linear-gradient(180deg, #0a0503, var(--wk-void));
+}
+
+/* 受创：一次性可读性优先，不做循环闪烁 */
+:global(body[data-dsh-wukong][data-wukong-state='alert']) {
+  --wk-line: rgba(173, 62, 51, 0.28);
+}
+
+/* ------------------------------------------------------------- backgrounds */
+
+/* The stock app frame paints its own solid background over the body; let the
+   token gradient above show through, same fix afterglow needed. */
+:global(body[data-dsh-wukong]) [class*='_frame'] {
+  background: transparent;
+}
+
+/* ------------------------------------------------------------------ panels */
+
+:global(body[data-dsh-wukong]) [class*='_sidebarCol'] {
+  background: linear-gradient(180deg, var(--wk-ink), var(--wk-void));
+  border-right: 1px solid var(--wk-line);
+}
+
+:global(body[data-dsh-wukong]) [class*='_detailsCol'] {
+  background: linear-gradient(180deg, var(--wk-ink), var(--wk-void));
+  border-left: 1px solid var(--wk-line);
+}
+
+/* Dialogue box: a single lacquered-wood panel, no glass/blur — that reads as
+   afterglow's coastal aesthetic, not this one's temple-hall density. */
+:global(body[data-dsh-wukong]) [data-composer-card] {
+  background: linear-gradient(180deg, var(--wk-surface), var(--wk-ink));
+  border: 1px solid var(--wk-line);
+}
+
+/* --------------------------------------------------------- buttons & chips */
+
+/* Primary send/invoke action: the one gold-filled surface in the whole skin. */
+:global(body[data-dsh-wukong]) [data-composer-card] [class*='_trailing'] button[class*='_primary'] {
+  background: linear-gradient(180deg, var(--wk-gold2), #a66c35);
+  border: 1px solid #a86b34;
+  color: #21150b;
+  transition: filter 140ms ease;
+}
+
+:global(body[data-dsh-wukong]) [data-composer-card] [class*='_trailing'] button[class*='_primary']:hover {
+  filter: brightness(1.06);
+}
+
+/* Secondary chips: row-add button and the access-mode trigger. Quiet bronze
+   line by default, gold on interaction — no fill until the primary action. */
+:global(body[data-dsh-wukong]) [data-composer-card] button[class*='_add'],
+:global(body[data-dsh-wukong]) [data-composer-card] [class*='_modes'] button[class*='_trigger'] {
+  background: var(--wk-surface);
+  border: 1px solid var(--wk-line);
+  color: var(--wk-text2);
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+:global(body[data-dsh-wukong]) [data-composer-card] button[class*='_add']:hover,
+:global(body[data-dsh-wukong]) [data-composer-card] [class*='_modes'] button[class*='_trigger']:hover {
+  border-color: var(--wk-gold);
+  color: var(--wk-text);
+}
+
+/* ------------------------------------------------------------------- input */
+
+:global(body[data-dsh-wukong]) [data-composer-card] textarea::placeholder,
+:global(body[data-dsh-wukong]) input::placeholder {
+  color: color-mix(in srgb, var(--wk-text2) 55%, transparent);
+}
+
+/* -------------------------------------------------------------- scrollbar */
+
+:global(body[data-dsh-wukong]) {
+  scrollbar-color: var(--wk-bronze) var(--wk-ink);
+}
+
+:global(body[data-dsh-wukong]) ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+:global(body[data-dsh-wukong]) ::-webkit-scrollbar-track {
+  background: var(--wk-ink);
+}
+
+:global(body[data-dsh-wukong]) ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--wk-bronze), var(--wk-gold));
+  border: 2px solid var(--wk-ink);
+  border-radius: 999px;
+}
+
+:global(body[data-dsh-wukong]) ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--wk-gold), var(--wk-gold2));
+}
+
+/* -------------------------------------------------------- links & accent */
+
+:global(body[data-dsh-wukong]) a {
+  color: var(--wk-gold2);
+}
+
+:global(body[data-dsh-wukong]) a:hover {
+  color: var(--wk-gold);
+}
+
+:global(body[data-dsh-wukong]) {
+  accent-color: var(--wk-gold);
+}
+
+:global(body[data-dsh-wukong]) ::selection {
+  background: color-mix(in srgb, var(--wk-gold) 35%, transparent);
+  color: var(--wk-text);
+}
+
+:global(body[data-dsh-wukong]) :focus-visible {
+  outline: 1px solid var(--wk-gold2);
+  outline-offset: 2px;
 }
