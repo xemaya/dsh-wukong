@@ -1,0 +1,5 @@
+# dsh-wukong skin bundle patch: inserts its public dsh.client entry into
+# the web plugin roster. Install with `dsh plugin --profile web add -w <path>`.
+- insert:
+    - id: ui-skin-wukong
+      name: '@dsh-external/dsh-wukong'

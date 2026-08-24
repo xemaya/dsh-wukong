@@ -1,0 +1,14 @@
+{
+  "id": "wukong",
+  "name": "DSH // 天命",
+  "nameEn": "DSH // TIANMING",
+  "author": "keman.ai",
+  "tagline": "黑神话悟空主题：你执笔，天命人执棍",
+  "description": "墨黑、古铜、暗金与余烬。天命人作为可见的 agent 化身驻守角色轨道；问道 / 岔路 / 降妖 / 受创 / 功成五态全部来自产品真实 DOM 证据，不伪造进度。仅自用，不分发。",
+  "tags": ["black-myth", "wukong", "ink-gold", "battle-hud", "dark-only"],
+  "accent": "#B9813F",
+  "bodyAttr": "data-dsh-wukong",
+  "package": "@dsh-external/dsh-wukong",
+  "wiring": { "id": "ui-skin-wukong", "bundleWired": true },
+  "order": 20
+}

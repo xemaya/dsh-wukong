@@ -1,0 +1,31 @@
+{
+  "name": "@dsh-external/dsh-wukong",
+  "description": "DSH // 天命 skin for the dsh web GUI: Black Myth Wukong theme — ink-black and old-gold, the Destined One as the visible agent avatar",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./skin.json": "./skin.json",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": { "inject": [], "platform": "web" }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "generate:assets": "node tools/embed-assets.mjs"
+  },
+  "license": "MIT",
+  "peerDependencies": { "@deepseek-ai/cordis": "^4.0.1" },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "lightningcss": "^1.32.0",
+    "tsdown": "0.22.14"
+  },
+  "files": ["lib/index.js", "lib/client.js", "cordis.patch.yml", "skin.json", "preview", "src", "tools", "assets-gen", "README.md"]
+}
