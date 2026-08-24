@@ -375,3 +375,44 @@
   outline: 2px solid var(--wk-gold2);
   outline-offset: 2px;
 }
+
+/* ===== 章回（P2）：真实 todo 才有回目 ===== */
+:global(body[data-dsh-wukong]) :global([data-testid='todo-panel'] ul) {
+  counter-reset: wk-chapter;
+}
+:global(body[data-dsh-wukong]) :global([data-testid='todo-panel'] li[data-status]) {
+  position: relative;
+  counter-increment: wk-chapter;
+}
+:global(body[data-dsh-wukong]) :global([data-testid='todo-panel'] li[data-status])::before {
+  content: '第' counter(wk-chapter, cjk-ideographic) '回';
+  margin-right: 6px;
+  font-size: 9px;
+  color: var(--wk-bronze);
+  font-weight: 700;
+}
+:global(body[data-dsh-wukong]) :global([data-testid='todo-panel'] li[data-status='in-progress'])::before {
+  color: var(--wk-ember);
+}
+:global(body[data-dsh-wukong]) :global([data-testid='todo-panel'] li[data-status='completed'])::before {
+  color: var(--wk-jade);
+}
+
+/* ===== 影神图（P2）：trajectory 卷轴纸纹与行分级 ===== */
+:global(body[data-dsh-wukong]) :global([data-trajectory-scroll]) {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(116, 76, 40, 0.08), transparent 40%),
+    linear-gradient(180deg, rgba(13, 11, 9, 0.9), rgba(8, 7, 6, 0.95));
+}
+:global(body[data-dsh-wukong]) :global([data-timeline-span='user']) {
+  border-left: 2px solid var(--wk-gold);
+}
+:global(body[data-dsh-wukong]) :global([data-timeline-span='tool']) {
+  border-left: 2px solid var(--wk-bronze);
+}
+:global(body[data-dsh-wukong]) :global([data-timeline-span='subtool']) {
+  border-left: 2px solid rgba(127, 91, 53, 0.4);
+}
+:global(body[data-dsh-wukong]) :global([data-error='true']) {
+  border-left-color: var(--wk-red);
+}
