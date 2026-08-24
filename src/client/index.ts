@@ -5,8 +5,9 @@
  * disposer 完整还原。状态由 contract.ts 从产品真实 DOM 证据推导。
  */
 import type { Context } from '@deepseek-ai/cordis'
-import { createContractEngine, isEmptySession, type SkinState } from './contract.ts'
+import { createContractEngine, isEmptySession, readBattleTelemetry, type SkinState } from './contract.ts'
 import { createCover } from './cover.ts'
+import { createHud } from './hud.ts'
 import { createStage } from './stage.ts'
 import { createInkTransition } from './vfx.ts'
 import { WK_ICON, WK_BG_DIALOGUE, WK_BG_EXECUTION } from './art.generated.ts'
@@ -43,14 +44,20 @@ export function apply(ctx: Context): void {
   body.style.setProperty('background-repeat', 'no-repeat')
 
   const { stage, setPose } = createStage()
+  const { hud, sync: syncHud } = createHud()
   const ink = createInkTransition()
   ctx.effect(() => () => ink.dispose(), 'ui-skin-wukong: ink transition')
+
+  const refreshHud = (): void => {
+    syncHud((body.dataset.wukongState ?? 'dialogue') as SkinState, readBattleTelemetry(body))
+  }
 
   let stateBaselined = false
   const onState = (state: SkinState): void => {
     body.dataset.wukongState = state
     setPose(state)
     syncBackdrop()
+    refreshHud()
     if (stateBaselined) ink.play()
     stateBaselined = true
   }
@@ -99,6 +106,9 @@ export function apply(ctx: Context): void {
   ownedNodes.add(stage)
   body.append(stage)
 
+  ownedNodes.add(hud)
+  body.append(hud)
+
   /* 若产品页面已有 theme-color meta（PWA 标题栏/移动状态栏），则恒写为 Void；
      产品没有该 meta 时皮肤不代为注入。 */
   const syncSystemChrome = (): void => {
@@ -145,7 +155,10 @@ export function apply(ctx: Context): void {
         coverRelevant = true
       }
     }
-    if (relevant) engine.sync()
+    if (relevant) {
+      engine.sync()
+      refreshHud()
+    }
     if (relevant || coverRelevant) syncCover()
   })
   observer.observe(body, {
@@ -157,5 +170,6 @@ export function apply(ctx: Context): void {
 
   syncBackdrop()
   engine.sync()
+  refreshHud()
   syncCover()
 }

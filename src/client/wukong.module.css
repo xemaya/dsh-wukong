@@ -300,3 +300,50 @@
 @media (prefers-reduced-motion: reduce) {
   .inkWipe { display: none; }
 }
+
+/* ===== 棍势 HUD（P2）：仅降妖/受创可见 ===== */
+.hud {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  border: 1px solid var(--wk-line);
+  border-radius: 999px;
+  background: rgba(13, 11, 9, 0.82);
+  backdrop-filter: blur(10px);
+  color: var(--wk-gold2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+:global(body[data-dsh-wukong][data-wukong-state='battle']) .hud,
+:global(body[data-dsh-wukong][data-wukong-state='alert']) .hud {
+  display: inline-flex;
+}
+:global(body[data-dsh-wukong][data-wukong-state='alert']) .hud {
+  color: var(--wk-red);
+  border-color: rgba(173, 62, 51, 0.35);
+}
+.hudBeads {
+  display: inline-flex;
+  gap: 5px;
+}
+.hudBeads i {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--wk-bronze);
+  background: transparent;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+.hudBeads i[data-lit] {
+  background: var(--wk-gold2);
+  border-color: var(--wk-gold2);
+  box-shadow: 0 0 6px rgba(224, 177, 103, 0.55);
+}
