@@ -33,6 +33,9 @@ export function createLoadout(): Loadout {
   return {
     chip,
     sync(): void {
+      // chip 未挂载（尚未找到座位，或皮肤已 dispose）时无需读取/写入任何东西——
+      // 轮询仍在跑，但不该对一个不在文档里的节点做无意义的 textContent 比对。
+      if (!chip.isConnected) return
       const trigger = document.querySelector<HTMLButtonElement>(TRIGGER_SELECTOR)
       let text = '披挂 —'
       if (trigger != null) {

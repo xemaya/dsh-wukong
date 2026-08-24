@@ -193,23 +193,41 @@
 }
 
 /* ===== 角色舞台（P1）===== */
+/* T2 终审加固：四档响应式改写为 mobile-first / min-width 单向级联——
+   不带 query 的基础规则即 <768 名牌头像档（最小尺寸），每个 min-width
+   断点只显式覆盖与上一档不同的属性，不再出现旧版 max-width 分档之间的
+   分数像素缝隙。1024px 起舞台从"圆窗头像"退回"矩形全身/半身立绘框"，
+   该档必须显式重置 border-radius/border/background/transform，否则会
+   继续沿用更窄断点（min-width 级联下默认仍生效）的圆窗样式。 */
 .stage {
   position: fixed;
-  right: 0;
-  bottom: 0;
-  width: var(--wk-stage-w, 380px);
-  height: min(86vh, 1100px);
+  right: 8px;
+  bottom: 120px;
+  width: 88px;
+  height: 88px;
   z-index: 1;
   pointer-events: none;
   overflow: hidden;
+  border-radius: 50%;
+  border: 1px solid var(--wk-line);
+  background: var(--wk-ink);
 }
 .stagePose {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: bottom center;
+  object-fit: cover;
+  object-position: top center;
+  /* 胸像/名牌圆窗实测（T6 playtest）：五态立绘均为等比全身构图（1080x1620），
+     纯 object-fit:cover + object-position:top 在 1:1 圆窗内只能露出图片顶部
+     66.7% 高度，头部占比不足、看不清脸——不符合"胸像应显示头部"的验收要求。
+     用 transform: scale + top-center 原点在圆窗内二次放大，经实测 2.1x 是能
+     让五态头部都进圆窗的折中值（更大会切到降妖/受创的脸）；P1 用裁切顶数，
+     专门胸像半身图留给 P3（spec §6.3）。1024px+ 退回矩形立绘框后需显式
+     重置回 transform: none（见下方 min-width:1024px 档）。 */
+  transform: scale(2.1);
+  transform-origin: top center;
   opacity: 0;
   transition: opacity 0.35s ease;
   filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.45));
@@ -226,70 +244,73 @@
 /* 安全区：≥1024 时主内容给舞台让出轨道宽（选择器来自 afterglow 已验证面）。
    T6 playtest 实测：空会话（土地庙封面）态产品根本不渲染 [data-chat-flow]
    节点，此规则天然不生效，未观察到视觉问题；仍加 :not([data-wukong-empty])
-   防御式加固，防止未来产品在 hero 阶段提前挂载 chat-flow 容器时占位露馅。 */
+   防御式加固，防止未来产品在 hero 阶段提前挂载 chat-flow 容器时占位露馅。
+   与下方三档共用 min-width 断点体系，但只读 --wk-stage-w（由各档自行赋值），
+   无需自身重排。 */
 @media (min-width: 1024px) {
   :global(body[data-dsh-wukong]:not([data-wukong-empty]) [data-chat-flow]) {
     padding-right: calc(var(--wk-stage-w, 380px) * 0.72);
   }
 }
 
-/* 四档响应式 */
-@media (min-width: 1440px) {
-  :global(body[data-dsh-wukong]) { --wk-stage-w: 380px; }
-}
-@media (min-width: 1024px) and (max-width: 1439px) {
-  :global(body[data-dsh-wukong]) { --wk-stage-w: 280px; }
-  .stage { height: min(70vh, 820px); }
-  .stagePose { object-fit: cover; object-position: top center; } /* 半身裁切 */
-}
-@media (min-width: 768px) and (max-width: 1023px) {
+/* 基础档（<768，名牌头像）：--wk-stage-w 与上方 .stage 宽高保持同值，
+   供安全区 calc() 读取；.stage/.stagePose 本身已在不带 query 的规则里给出。 */
+:global(body[data-dsh-wukong]) { --wk-stage-w: 88px; }
+
+/* 胸像档（min-width:768px，覆盖至 1023px 为止的视口）：宽高改为固定
+   132px 圆窗；.stagePose 与基础档同为"圆窗 + 2.1x 放大裁切"，无需覆写。
+   布局避让实测（T6 修复轮，900x800 真机视口，todo 面板展开）：composer
+   控制行（发送键所在的 .uV2eYG_row）顶边距视口底部 101px（699/800），与
+   视口宽度无关（该行随 composer 底部锚定，不随 --wk-stage-w 变化）。旧值
+   bottom:96px 的头像圆窗底边距视口底部只有 96px，比控制行顶边矮 5px，圆窗
+   右下角实测与发送键出现 5px×34px 的真实重叠。改为 bottom:114px，令圆窗
+   底边留出 13px 安全边距。 */
+@media (min-width: 768px) {
   :global(body[data-dsh-wukong]) { --wk-stage-w: 132px; }
-  /* 布局避让实测（T6 修复轮，900x800 真机视口，todo 面板展开）：composer 控制行
-     （发送键所在的 .uV2eYG_row）顶边距视口底部 101px（699/800），与视口宽度
-     无关（该行随 composer 底部锚定，不随 --wk-stage-w 变化）。旧值 bottom:96px
-     的头像圆窗底边距视口底部只有 96px，比控制行顶边矮 5px，圆窗右下角实测与
-     发送键出现 5px×34px 的真实重叠（同一 bug 在胸像档的较轻表现）。改为
-     bottom:114px，令圆窗底边留出 13px 安全边距。 */
   .stage {
-    height: 132px;
     width: 132px;
+    height: 132px;
     right: 10px;
     bottom: 114px;
-    border-radius: 50%;
-    border: 1px solid var(--wk-line);
-    background: var(--wk-ink);
   }
-  /* 胸像圆窗实测（T6 playtest）：五态立绘均为等比全身构图（1080x1620），
-     纯 object-fit:cover + object-position:top 在 1:1 圆窗内只能露出图片顶部
-     66.7% 高度，五态里问道/岔路/功成三态头顶紧贴画布顶缘、头部占比不到该
-     范围的 1/5，圆窗视觉上被躯干/双手占满，看不清脸——不符合"胸像应显示
-     头部"的验收要求。降妖/受创两态因动态构图头部下移约 15%–30%，纯裁切
-     还够不到脸。用 transform: scale + top-center 原点在圆窗内二次放大，
-     经实测 2.1x 是能让五态头部都进圆窗的折中值（更大会切到降妖/受创的脸）；
-     P1 用裁切顶数，专门胸像半身图留给 P3（spec §6.3）。 */
-  .stagePose { object-fit: cover; object-position: top center; transform: scale(2.1); transform-origin: top center; } /* 胸像 */
 }
-@media (max-width: 767px) {
-  :global(body[data-dsh-wukong]) { --wk-stage-w: 88px; }
-  /* 布局避让实测（T6 修复轮，playtest 报告 task-6-report.md §关切事项1，600x800
-     真机视口，todo 面板展开于 composer 上方后再点开三步已完成清单）：
-     composer 控制行（发送键所在的 .uV2eYG_row）顶边距视口底部固定 101px
-     （699/800，与 --wk-stage-w、视口宽度均无关，只随 composer 自身锚定）。
-     旧值 bottom:88px 时头像圆窗底边距视口底部只有 88px，比控制行顶边矮 13px，
-     实测圆窗右下角与发送键出现 13px×34px 的真实重叠区域（box-model 层面；
-     该重叠此刻恰好被 composer 自身更高的 z-index 覆盖着未必总能视觉盖住，
-     不应依赖这层巧合）。改为 bottom:120px，令圆窗底边留出 19px 安全边距，
-     两档（本档 + 上方 768-1023 胸像档）统一按同一控制行基准量出各自安全值。 */
+
+/* 半身档（min-width:1024px，覆盖至 1439px 为止的视口）：退回矩形立绘框，
+   裁切策略仍是 object-fit:cover（半身，不放大），因此显式重置
+   border-radius/border/background 回全身值（none/none/none），并把
+   right/bottom 从圆窗的偏移值收回到贴边 0；.stagePose 需把胸像档继承来的
+   transform:scale(2.1) 显式重置为 none，object-fit/object-position 本身
+   与基础档同为 cover/top center，无需再写。 */
+@media (min-width: 1024px) {
+  :global(body[data-dsh-wukong]) { --wk-stage-w: 280px; }
   .stage {
-    height: 88px;
-    width: 88px;
-    right: 8px;
-    bottom: 120px;
-    border-radius: 50%;
-    border: 1px solid var(--wk-line);
-    background: var(--wk-ink);
+    width: 280px;
+    height: min(70vh, 820px);
+    right: 0;
+    bottom: 0;
+    border-radius: 0;
+    border: none;
+    background: none;
   }
-  .stagePose { object-fit: cover; object-position: top center; transform: scale(2.1); transform-origin: top center; } /* 名牌头像，同胸像档裁切值 */
+  .stagePose {
+    transform: none;
+  }
+}
+
+/* 全身档（min-width:1440px）：等比包含整幅立绘，构图与画布边界一致——
+   把半身档的 object-fit:cover/object-position:top center 显式重置回
+   contain/bottom center；border-radius/border/background/transform/
+   right/bottom 均延续半身档的全身框值，无需再写。 */
+@media (min-width: 1440px) {
+  :global(body[data-dsh-wukong]) { --wk-stage-w: 380px; }
+  .stage {
+    width: 380px;
+    height: min(86vh, 1100px);
+  }
+  .stagePose {
+    object-fit: contain;
+    object-position: bottom center;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -466,7 +487,7 @@
 :global(body[data-dsh-wukong]) :global([data-timeline-span='subtool']) {
   border-left: 2px solid rgba(127, 91, 53, 0.4);
 }
-:global(body[data-dsh-wukong]) :global([data-error='true']) {
+:global(body[data-dsh-wukong]) :global([data-timeline-span][data-error='true']) {
   border-left-color: var(--wk-red);
 }
 

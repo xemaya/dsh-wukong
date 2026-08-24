@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apply } from './index.ts'
 import { WK_POSE_EXECUTION } from './art.generated.ts'
 
@@ -184,5 +184,20 @@ describe('apply', () => {
     expect(document.body.dataset.wukongState).toBe('dialogue')
     alien.remove()
     dispose()
+  })
+
+  it('dispose 后 body 无任何皮肤节点，轮询停止', async () => {
+    // 自包含：只在本用例内切到 fake timers 并在结束前切回 real timers，
+    // 不影响本文件其它用例里既有的 `await new Promise(r => setTimeout(r, 50))`
+    // 微任务等待（那些用例运行时 fake timers 并未激活）。
+    vi.useFakeTimers()
+    const { ctx, dispose } = fakeCtx()
+    apply(ctx as never)
+    dispose()
+    expect(document.body.querySelectorAll('[data-skin-owner]')).toHaveLength(0)
+    const title = document.title
+    vi.advanceTimersByTime(5000)  // poll 若未清会继续跑（不可观察副作用，但不应抛错）
+    expect(document.title).toBe(title)
+    vi.useRealTimers()
   })
 })

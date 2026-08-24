@@ -26,6 +26,7 @@ describe('createLoadout', () => {
   it('sync 从原生触发器 title 属性读出模型与棍势', () => {
     mountSlot('DeepSeek R1', 'high')
     const { chip, sync } = createLoadout()
+    document.body.append(chip)  // sync 早退依赖 isConnected，先挂载
     sync()
     expect(chip.textContent).toContain('DeepSeek R1')
     expect(chip.textContent).toContain('劈棍势')
@@ -34,6 +35,7 @@ describe('createLoadout', () => {
   it('点击转发原生触发器', () => {
     mountSlot('M', 'low')
     const { chip, sync } = createLoadout()
+    document.body.append(chip)
     sync()
     const trigger = document.querySelector<HTMLButtonElement>("[data-slot='conversation.input.model'] button")!
     const spy = vi.fn()
@@ -44,7 +46,17 @@ describe('createLoadout', () => {
 
   it('无触发器时 chip 显示占位不抛错', () => {
     const { chip, sync } = createLoadout()
+    document.body.append(chip)
     sync()
     expect(chip.textContent).toContain('—')
+  })
+
+  it('chip 未挂载（不在文档树上）时 sync 早退，不改 textContent', () => {
+    mountSlot('DeepSeek R1', 'high')
+    const { chip, sync } = createLoadout()
+    // 刻意不 append chip：isConnected 为 false，sync 应早退
+    expect(chip.isConnected).toBe(false)
+    sync()
+    expect(chip.textContent).toBe('')
   })
 })
