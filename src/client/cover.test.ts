@@ -24,4 +24,13 @@ describe('createCover', () => {
     const { cover } = createCover()
     expect(cover.getAttribute('aria-hidden')).toBe('true')
   })
+
+  it('内嵌土地庙 hover 元素，装饰性 alt 为空，封面依旧 aria-hidden', () => {
+    const { cover } = createCover()
+    const imgs = cover.querySelectorAll('img')
+    expect(imgs.length).toBe(2)
+    const shrine = imgs[imgs.length - 1]
+    expect(shrine.getAttribute('alt')).toBe('')
+    expect(cover.getAttribute('aria-hidden')).toBe('true')
+  })
 })

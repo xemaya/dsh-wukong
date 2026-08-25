@@ -18,6 +18,7 @@ const ASSETS = [
   ['WK_POSE_CLEAR', 'pose-clear.webp'],
   ['WK_BG_DIALOGUE', 'bg-dialogue.webp'],
   ['WK_BG_EXECUTION', 'bg-execution.webp'],
+  ['WK_TUDIMIAO', 'tudimiao.webp'],
 ]
 
 const MIME = { '.webp': 'image/webp', '.png': 'image/png' }

@@ -211,6 +211,29 @@
   color: var(--wk-gold2); text-shadow: 0 4px 20px rgba(0,0,0,.62);
 }
 
+/* 土地庙 hover 装饰：反馈项 1（"直面天命"文案不够直观）。封面根是
+   pointer-events: none 的纯装饰层，这是唯一显式打开 pointer-events 的
+   例外——土地庙需要响应 hover，但它不是按钮、不接受焦点、不拦截任何
+   点击语义。真机确认见 screenshots/shot-shrine-hover.png：右下角是
+   hero 页空背景区，不压 composer / 文案。 */
+.coverShrine {
+  position: absolute;
+  right: 4%;
+  bottom: 6%;
+  width: clamp(180px, 17vw, 300px);
+  pointer-events: auto;
+  cursor: default;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.55));
+  transition: transform 0.35s ease, filter 0.35s ease;
+}
+.coverShrine:hover {
+  transform: translateY(-10px);
+  filter: drop-shadow(0 26px 50px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 24px rgba(224, 177, 103, 0.55));
+}
+@media (prefers-reduced-motion: reduce) {
+  .coverShrine { transition: none; }
+}
+
 /* ===== 角色舞台（P1）===== */
 /* T2 终审加固：四档响应式改写为 mobile-first / min-width 单向级联——
    不带 query 的基础规则即 <768 名牌头像档（最小尺寸），每个 min-width

@@ -2,7 +2,7 @@
  * 土地庙 — New Session 全屏封面层。纯呈现：不拦截任何输入，
  * pointer-events 仅落在封面自身装饰上，composer 等原生控件在其上层。
  */
-import { WK_COVER } from './art.generated.ts'
+import { WK_COVER, WK_TUDIMIAO } from './art.generated.ts'
 import styles from './wukong.module.css'
 
 export function createCover(): { cover: HTMLDivElement; setVisible(visible: boolean): void } {
@@ -15,7 +15,8 @@ export function createCover(): { cover: HTMLDivElement; setVisible(visible: bool
     <div class="${styles.coverCopy}">
       <span class="${styles.coverKicker}">DeepSeek Harness · Black Myth Wukong</span>
       <h1 class="${styles.coverTitle}">直 面 天 命</h1>
-    </div>`
+    </div>
+    <img class="${styles.coverShrine}" alt="" src="${WK_TUDIMIAO}"/>`
   return {
     cover,
     setVisible(visible: boolean): void {
