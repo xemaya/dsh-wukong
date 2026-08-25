@@ -230,6 +230,18 @@
   transform: translateY(-10px);
   filter: drop-shadow(0 26px 50px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 24px rgba(224, 177, 103, 0.55));
 }
+@media (max-width: 899px) {
+  .coverShrine {
+    width: clamp(110px, 22vw, 170px);
+    bottom: 4%;
+    right: 3%;
+  }
+}
+@media (max-width: 599px) {
+  .coverShrine {
+    display: none; /* 窄屏封面标题优先，土地庙让位 */
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .coverShrine { transition: none; }
 }
@@ -617,27 +629,27 @@
 :global(body[data-dsh-wukong]) :global([data-timeline-span][data-error='true']) {
   border-left-color: var(--wk-red);
 }
-:global(body[data-dsh-wukong]) :global(tr[data-kind] > td:first-child) {
+:global(body[data-dsh-wukong]) :global([data-trajectory-scroll] tr[data-kind] > td:first-child) {
   border-left: 3px solid var(--wk-bronze);
   transition: background-color 140ms ease;
 }
-:global(body[data-dsh-wukong]) :global(tr[data-kind='user'] > td:first-child) {
+:global(body[data-dsh-wukong]) :global([data-trajectory-scroll] tr[data-kind='user'] > td:first-child) {
   border-left-color: var(--wk-gold);
 }
-:global(body[data-dsh-wukong]) :global(tr[data-kind='tool'] > td:first-child) {
+:global(body[data-dsh-wukong]) :global([data-trajectory-scroll] tr[data-kind='tool'] > td:first-child) {
   border-left-color: var(--wk-ember);
 }
-:global(body[data-dsh-wukong]) :global(tr[data-kind='subtool'] > td:first-child) {
+:global(body[data-dsh-wukong]) :global([data-trajectory-scroll] tr[data-kind='subtool'] > td:first-child) {
   border-left-color: rgba(127, 91, 53, 0.5);
 }
-:global(body[data-dsh-wukong]) :global(tr[data-kind='system'] > td:first-child),
-:global(body[data-dsh-wukong]) :global(tr[data-kind='context'] > td:first-child) {
+:global(body[data-dsh-wukong]) :global([data-trajectory-scroll] tr[data-kind='system'] > td:first-child),
+:global(body[data-dsh-wukong]) :global([data-trajectory-scroll] tr[data-kind='context'] > td:first-child) {
   border-left-color: var(--wk-jade);
 }
-:global(body[data-dsh-wukong]) :global(tr[data-kind='message'] > td:first-child) {
+:global(body[data-dsh-wukong]) :global([data-trajectory-scroll] tr[data-kind='message'] > td:first-child) {
   border-left-color: var(--wk-gold2);
 }
-:global(body[data-dsh-wukong]) :global(tr[data-kind]:hover > td) {
+:global(body[data-dsh-wukong]) :global([data-trajectory-scroll] tr[data-kind]:hover > td) {
   background: color-mix(in srgb, var(--wk-ink) 55%, transparent);
 }
 
