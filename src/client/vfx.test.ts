@@ -37,12 +37,20 @@ describe('createFreezeRing', () => {
   beforeEach(() => vi.useFakeTimers())
   afterEach(() => { vi.useRealTimers(); document.body.innerHTML = '' })
 
-  it('play 挂一次性定身圈，900ms 后自移除', () => {
+  it('play 挂一次性定身圈，1150ms 后自移除', () => {
     const ring = createFreezeRing()
     ring.play()
     expect(document.body.querySelector('[data-skin-owner="wukong"]')).not.toBeNull()
-    vi.advanceTimersByTime(900)
+    vi.advanceTimersByTime(1150)
     expect(document.body.querySelector('[data-skin-owner="wukong"]')).toBeNull()
+  })
+
+  it('定身圈内含中央"定"字大字层', () => {
+    const ring = createFreezeRing()
+    ring.play()
+    const node = document.body.querySelector('[data-skin-owner="wukong"]')
+    expect(node?.textContent).toBe('定')
+    ring.dispose()
   })
 
   it('播放中重复 play 不叠加', () => {

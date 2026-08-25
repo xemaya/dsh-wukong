@@ -12,6 +12,9 @@ export function stanceFor(effort: string): string {
   if (/low/i.test(effort)) return '戳棍势'
   if (/medium/i.test(effort)) return '立棍势'
   if (/high/i.test(effort)) return '劈棍势'
+  // 真机反馈实测：产品 effort 触发器还有档位文案 "Max"（用户截图实证），
+  // 未映射时直接透传原文，披挂条上出现裸英文，破坏"棍势三式"的皮肤感。
+  if (/max/i.test(effort)) return '劈棍势·极'
   return effort
 }
 

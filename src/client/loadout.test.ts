@@ -6,6 +6,7 @@ describe('stanceFor', () => {
     expect(stanceFor('low')).toBe('戳棍势')
     expect(stanceFor('Medium')).toBe('立棍势')
     expect(stanceFor('HIGH')).toBe('劈棍势')
+    expect(stanceFor('Max')).toBe('劈棍势·极')
     expect(stanceFor('ultra')).toBe('ultra')
   })
 })

@@ -40,6 +40,25 @@
   background: transparent;
 }
 
+/* 会话主内容面（问道场景可见性，反馈 2a）：真机 elementFromPoint 实测——
+   [class*='_frame'] 本身已透明，但其内更深一层的会话根节点（真实 DOM 属性
+   data-phase，值 hero/settling/active，见 apply.ts 对该属性的既有依赖注释）
+   自带纯色不透明底 rgb(21,21,23)，把 body 内联 background-image（黑风山
+   冷月/余烬场景图）整片盖死，会话页只剩纯黑+立绘。data-phase 是产品原生
+   ConversationRoot 的受控属性，比类名 hash 稳定，直接作用于它。改半透明
+   ink（约 0.6 不透明度）+ backdrop-filter 模糊，让场景图透出的同时仍为
+   无自带气泡的纯文本消息（assistant 侧）保留可读对比度；用户气泡
+   （*_bubble）本身已是独立不透明深色面，不受影响，无需改动。
+   注意：data-phase 不是 ConversationRoot 独有——composer 输入框
+   （<textarea data-phase="plain">）也复用了这个属性名，真机
+   querySelectorAll('[data-phase]') 实测到两个命中。裸 [data-phase] 会
+   把这条半透明+模糊规则错误地套到输入框上，故限定 div[data-phase]，
+   只打中会话根节点（它恒为 DIV），不影响 TEXTAREA。 */
+:global(body[data-dsh-wukong]) div[data-phase] {
+  background: color-mix(in srgb, var(--wk-ink) 62%, transparent);
+  backdrop-filter: blur(5px);
+}
+
 /* ------------------------------------------------------------------ panels */
 
 :global(body[data-dsh-wukong]) [class*='_sidebarCol'] {
@@ -337,25 +356,71 @@
   .inkWipe { display: none; }
 }
 
-/* ===== 定身术（P3）：用户点 Stop 的一次性金圈定格 ===== */
+/* ===== 定身术（P3/反馈 3）：用户点 Stop 的一次性金圈定格 =====
+   反馈原版金圈太弱、几乎看不出效果。加两层：::before 全屏金色 vignette
+   闪光（比金圈更快更亮，制造"定"的一瞬冲击），.freezeGlyph 中央大号
+   "定"字缩放淡入淡出。三层动画（金圈/闪光/字）时长统一 1150ms（1.1–1.2s
+   区间），必须与 vfx.ts 的 createFreezeRing 定时器 ms 保持同步——定时器
+   短于动画会在播完前把节点连同尚在播的动画一起摘掉，出现硬切闪断。 */
 .freezeRing {
   position: fixed;
   inset: 0;
   z-index: 60;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: radial-gradient(circle at 50% 55%, transparent 30%, rgba(224, 177, 103, 0.16) 46%, transparent 62%);
-  animation: wkFreeze 0.9s ease-out forwards;
+  animation: wkFreeze 1.15s ease-out forwards;
+}
+.freezeRing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(224, 177, 103, 0.55) 0%, rgba(185, 91, 47, 0.22) 45%, transparent 76%);
+  animation: wkFreezeFlash 1.15s ease-out forwards;
+}
+.freezeGlyph {
+  position: relative;
+  font-family: 'STKaiti', 'KaiTi', serif;
+  font-size: clamp(96px, 14vw, 220px);
+  line-height: 1;
+  color: var(--wk-gold2);
+  text-shadow: 0 0 40px rgba(224, 177, 103, 0.65), 0 0 90px rgba(185, 91, 47, 0.4);
+  opacity: 0;
+  transform: scale(0.5);
+  animation: wkFreezeGlyph 1.15s ease-out forwards;
 }
 @keyframes wkFreeze {
   0% { opacity: 0; transform: scale(0.4); }
   22% { opacity: 1; }
   100% { opacity: 0; transform: scale(1.25); }
 }
+@keyframes wkFreezeFlash {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  38% { opacity: 0.5; }
+  100% { opacity: 0; }
+}
+@keyframes wkFreezeGlyph {
+  0% { opacity: 0; transform: scale(0.5); }
+  18% { opacity: 1; transform: scale(1.15); }
+  30% { opacity: 1; transform: scale(1); }
+  78% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
 @media (prefers-reduced-motion: reduce) {
   .freezeRing { display: none; }
 }
 
-/* ===== 棍势 HUD（P2）：仅降妖/受创可见 ===== */
+/* ===== 棍势 HUD（P2/反馈 2b）：仅降妖/受创可见 =====
+   <1024（名牌/胸像档，无全身立绘）：维持屏幕顶部居中，无立绘可悬。
+   ≥1024（半身/全身立绘档）：真机反馈——用户要 HUD 悬在天命人头顶，而非
+   页面正中央。舞台轨道固定贴右（.stage right:0，宽度由 --wk-stage-w 定），
+   用 right: 轨道宽一半 + transform: translateX(50%) 的镜像居中写法，把
+   HUD（宽度由内容撑开，不能写死）精确居中在轨道正上方，不随 HUD 自身
+   文案长度变化而偏移；top 维持小偏移，两档轨道高度（70vh/86vh）下换算出
+   的立绘顶部都明显低于此值，故不会遮到脸。 */
 .hud {
   position: fixed;
   top: 10px;
@@ -375,6 +440,14 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   pointer-events: none;
+}
+@media (min-width: 1024px) {
+  .hud {
+    left: auto;
+    right: calc(var(--wk-stage-w) / 2);
+    top: 18px;
+    transform: translateX(50%);
+  }
 }
 :global(body[data-dsh-wukong][data-wukong-state='battle']) .hud,
 :global(body[data-dsh-wukong][data-wukong-state='alert']) .hud {
@@ -416,6 +489,18 @@
   0%, 100% { transform: translateX(-50%); }
   25% { transform: translateX(calc(-50% - 5px)); }
   55% { transform: translateX(calc(-50% + 4px)); }
+}
+/* ≥1024 档 .hud 的居中基准是 translateX(50%)（见上），受创震动不能沿用
+   居中基准为 -50% 的 keyframes，否则每帧都会先跳位再震，需要镜像一份。 */
+@media (min-width: 1024px) {
+  :global(body[data-dsh-wukong][data-wukong-state='alert']) .hud {
+    animation: wkHudShakeStage 0.4s ease-out;
+  }
+  @keyframes wkHudShakeStage {
+    0%, 100% { transform: translateX(50%); }
+    25% { transform: translateX(calc(50% - 5px)); }
+    55% { transform: translateX(calc(50% + 4px)); }
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .hudBeads i[data-lit],
@@ -472,11 +557,30 @@
   color: var(--wk-jade);
 }
 
-/* ===== 影神图（P2）：trajectory 卷轴纸纹与行分级 ===== */
+/* ===== 影神图（P2/反馈 5）：trajectory 卷轴纸纹与行分级 =====
+   真机 elementFromPoint + getComputedStyle 实测两处问题：
+   1) [data-trajectory-scroll] 选择器确实命中（真实类名 Y0dWHa_tablePane），
+      渐变也确实生效，但其内的 <table data-scroll-ready="true"> 自带纯色
+      不透明底 rgb(35,35,36)，把整块渐变盖死——与反馈 2a 同一类问题（子层
+      自带不透明底吃掉父层皮肤色）。且原渐变本身两个颜色都逼近纯黑
+      （0.08 透明度金 + 0.9/0.95 不透明墨），肉眼确实看不出来，加重到位。
+   2) [data-timeline-span] 选择器也命中，但命中的是页面顶部时间轴图表里
+      13~15px 宽的小色块（甘特图分段），2px 左边线在这么窄的色块上视觉
+      为零。用户说的"行"实指下方列表——真实 DOM 是 <tr data-kind="tool|
+      subtool|user|system|context|message" data-trajectory-row-key="…">，
+      比旧选择器更贴近"行"，且 data-kind 覆盖全部真实取值（旧版只认
+      user/tool/subtool，漏了 system/context/message）。左边线加到 tr 的
+      首个 <td> 上——表格分离边框模型下边框画在 tr 上不可靠，td 才保证
+      渲染；同时加 hover 墨色，命中真实语义化行。原 [data-timeline-span]
+      规则保留，作为顶部甘特图的次要点缀，无害。 */
 :global(body[data-dsh-wukong]) :global([data-trajectory-scroll]) {
   background:
-    radial-gradient(circle at 18% 8%, rgba(116, 76, 40, 0.08), transparent 40%),
-    linear-gradient(180deg, rgba(13, 11, 9, 0.9), rgba(8, 7, 6, 0.95));
+    radial-gradient(circle at 18% 8%, rgba(185, 129, 63, 0.2), transparent 45%),
+    radial-gradient(circle at 85% 92%, rgba(122, 79, 42, 0.16), transparent 50%),
+    linear-gradient(180deg, rgba(23, 20, 17, 0.97), rgba(8, 7, 6, 0.98));
+}
+:global(body[data-dsh-wukong]) :global([data-trajectory-scroll] [data-scroll-ready]) {
+  background: transparent;
 }
 :global(body[data-dsh-wukong]) :global([data-timeline-span='user']) {
   border-left: 2px solid var(--wk-gold);
@@ -490,19 +594,73 @@
 :global(body[data-dsh-wukong]) :global([data-timeline-span][data-error='true']) {
   border-left-color: var(--wk-red);
 }
+:global(body[data-dsh-wukong]) :global(tr[data-kind] > td:first-child) {
+  border-left: 3px solid var(--wk-bronze);
+  transition: background-color 140ms ease;
+}
+:global(body[data-dsh-wukong]) :global(tr[data-kind='user'] > td:first-child) {
+  border-left-color: var(--wk-gold);
+}
+:global(body[data-dsh-wukong]) :global(tr[data-kind='tool'] > td:first-child) {
+  border-left-color: var(--wk-ember);
+}
+:global(body[data-dsh-wukong]) :global(tr[data-kind='subtool'] > td:first-child) {
+  border-left-color: rgba(127, 91, 53, 0.5);
+}
+:global(body[data-dsh-wukong]) :global(tr[data-kind='system'] > td:first-child),
+:global(body[data-dsh-wukong]) :global(tr[data-kind='context'] > td:first-child) {
+  border-left-color: var(--wk-jade);
+}
+:global(body[data-dsh-wukong]) :global(tr[data-kind='message'] > td:first-child) {
+  border-left-color: var(--wk-gold2);
+}
+:global(body[data-dsh-wukong]) :global(tr[data-kind]:hover > td) {
+  background: color-mix(in srgb, var(--wk-ink) 55%, transparent);
+}
 
-/* ===== 披挂条（P2）===== */
+/* ===== 披挂条（P2/反馈 6b）=====
+   真机实测：座位容器 [data-composer-seat]（真实类名 *_composerSeat）是
+   flex-direction: column 且 align-items 为默认 normal（即 stretch），chip
+   作为其唯一子节点，块级 <button> 在纵向 flex 容器的交叉轴（水平方向）
+   上默认被拉伸至整个座位宽度——这就是"裸文字链横贯底部"的真实成因，不是
+   宽度写死。修法：align-self 脱离 stretch，宽度收回到内容自适应，再用
+   margin 收窄到右侧、与上方 composer 卡片拉开一点距离。视觉从纯文字升级
+   为"装备槽"质感：切角边框（clip-path）、"棍"字徽记前缀（::before，不
+   进 chip.textContent，不影响 sync() 的文案比对）、hover 金辉。 */
 .loadoutChip {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   height: 26px;
+  margin: 8px 2px 0 auto;
+  padding: 0 10px 0 6px;
   border: 1px solid var(--wk-line);
-  border-radius: 7px;
-  background: var(--wk-ink);
+  border-radius: 3px;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  background: linear-gradient(180deg, var(--wk-surface), var(--wk-ink));
   color: var(--wk-text2);
   font-size: 10px;
-  padding: 0 9px;
   cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+.loadoutChip::before {
+  content: '棍';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 2px;
+  border: 1px solid var(--wk-bronze);
+  background: rgba(122, 79, 42, 0.28);
+  color: var(--wk-gold2);
+  font-size: 9px;
+  font-weight: 700;
 }
 .loadoutChip:hover {
   border-color: rgba(211, 164, 91, 0.4);
   color: var(--wk-gold2);
+  box-shadow: 0 0 10px rgba(224, 177, 103, 0.35);
 }
