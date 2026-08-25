@@ -33,6 +33,12 @@ DeepSeek Harness Web GUI 的原创主题皮肤：以《黑神话：悟空》的�
 | --- | --- |
 | ![chapters](screenshots/shot-chapters.png) | ![trajectory](screenshots/shot-trajectory-zoom.png) |
 
+## 许可证
+
+本仓库的原创代码与原创/AI 生成素材按 MIT License 发布，详见 [LICENSE](LICENSE)。本项目不包含《黑神话：悟空》的原始游戏素材；游戏名称仅作主题致意。
+
+MIT License © 2026 keman.ai
+
 ## 安装
 
 ```sh
