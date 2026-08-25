@@ -53,8 +53,21 @@
    （<textarea data-phase="plain">）也复用了这个属性名，真机
    querySelectorAll('[data-phase]') 实测到两个命中。裸 [data-phase] 会
    把这条半透明+模糊规则错误地套到输入框上，故限定 div[data-phase]，
-   只打中会话根节点（它恒为 DIV），不影响 TEXTAREA。 */
-:global(body[data-dsh-wukong]) div[data-phase] {
+   只打中会话根节点（它恒为 DIV），不影响 TEXTAREA。
+
+   回归修复（hero 页封面被产品 UI 全部盖没）：backdrop-filter 会强制建立
+   新层叠上下文（CSS 规范如此，即便元素本身 position:static / z-index:auto）。
+   真机实测确认——div[data-phase='hero'] 一旦拿到 backdrop-filter，产品
+   hero 页整棵子树（含 composerHero，其原 z-index:1 是相对该新上下文的
+   局部值）被拍平为一个原子层，按“同层内无定位/z-index:auto 的普通流”
+   规则参与 body 根层叠上下文排序——而这一组恒先于 178 行 .cover 所在的
+   “z-index 为正的定位元素”组绘制，与 DOM 先后顺序无关，于是 .cover
+   稳定盖住了整个产品 UI（顶栏/侧栏/composer 全部消失）。而问道场景可见性
+   （反馈 2a 本意）只发生在会话页（phase 为 settling/active），hero 页
+   根本没有场景消息可读性问题要修。故将本规则限定为非 hero 相位，hero
+   页恢复回归前的层叠行为（.cover z1 与 composerHero z1 打平、DOM 序取胜），
+   会话页的半透明+模糊改动保持不变。 */
+:global(body[data-dsh-wukong]) div[data-phase]:not([data-phase='hero']) {
   background: color-mix(in srgb, var(--wk-ink) 62%, transparent);
   backdrop-filter: blur(5px);
 }
