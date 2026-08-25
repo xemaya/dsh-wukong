@@ -85,7 +85,7 @@ export function apply(ctx: Context): void {
   }
   const engine = createContractEngine(body, onState)
 
-  const { cover, setVisible } = createCover()
+  const { cover, setVisible, dispose: disposeCover } = createCover()
   const syncCover = (): void => {
     const empty = isEmptySession(body)
     setVisible(empty)
@@ -95,6 +95,7 @@ export function apply(ctx: Context): void {
 
   ctx.effect(() => () => {
     engine.dispose()
+    disposeCover()
     observer?.disconnect()
     themeColorObserver?.disconnect()
     delete body.dataset.dshWukong

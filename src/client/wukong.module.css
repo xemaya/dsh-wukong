@@ -66,10 +66,19 @@
    （反馈 2a 本意）只发生在会话页（phase 为 settling/active），hero 页
    根本没有场景消息可读性问题要修。故将本规则限定为非 hero 相位，hero
    页恢复回归前的层叠行为（.cover z1 与 composerHero z1 打平、DOM 序取胜），
-   会话页的半透明+模糊改动保持不变。 */
+   会话页的半透明+模糊改动保持不变。
+
+   真机走查反馈（黑风山场景看不清）：blur(5px) + 62% 墨色底糊得太重——
+   山形/古刹/月亮的轮廓和明暗层次基本被磨平，只剩一片均匀灰雾，问道场景
+   图形同没换背景差别不大。真机对比多组取值后固定在 blur(2px) +
+   38% 墨色底：模糊半径只做"轻微融合"不做"磨砂遮罩"，山体轮廓、庙宇
+   剪影、月轮清晰可辨；alpha 38% 落在需求给的 0.3–0.5 区间下段——纯文本
+   assistant 消息在浅色场景图区域仍靠这层墨色打底维持对比度，实测未观察
+   到可读性劣化（无需另外给消息卡单独加深，未引入 messageCard 选择器）。
+   battle/alert 态复用同一选择器，同步变浅，真机确认余烬版同样清晰。 */
 :global(body[data-dsh-wukong]) div[data-phase]:not([data-phase='hero']) {
-  background: color-mix(in srgb, var(--wk-ink) 62%, transparent);
-  backdrop-filter: blur(5px);
+  background: color-mix(in srgb, var(--wk-ink) 38%, transparent);
+  backdrop-filter: blur(2px);
 }
 
 /* ------------------------------------------------------------------ panels */
@@ -201,6 +210,7 @@
   width: 100%; height: 100%;
   object-fit: cover; object-position: center;
   filter: contrast(1.03) brightness(0.9);
+  transition: opacity 0.3s ease;
 }
 .cover::after {
   content: '';
@@ -208,10 +218,24 @@
   background:
     linear-gradient(90deg, rgba(4,3,3,.68) 0%, rgba(4,3,3,.26) 34%, rgba(4,3,3,.08) 56%, rgba(4,3,3,.2) 100%),
     linear-gradient(180deg, rgba(3,2,2,.08) 0%, rgba(3,2,2,.02) 45%, rgba(3,2,2,.34) 73%, rgba(3,2,2,.88) 100%);
+  transition: opacity 0.3s ease;
 }
-.coverCopy {
+/* 土地庙展开态（.coverShrine 点击后 .cover[data-wk-shrine-open]）：封面
+   美术图 + 渐变叠层淡到近透明，露出封面之下——结构上本就独立于
+   div[data-phase]、position:static/z-index:auto、从未真正被封面挡住点击
+   （封面恒 pointer-events:none）、只是视觉上被压在底下的原生侧栏会话
+   列表。直面天命标题与土地庙自身保持不透明，构图不散。 */
+.cover[data-wk-shrine-open] .coverArt,
+.cover[data-wk-shrine-open]::after {
+  opacity: 0.12;
+}
+.coverLeft {
   position: absolute; left: 42px; top: 50%;
   transform: translateY(-58%); max-width: 430px;
+  display: flex; flex-direction: column; align-items: flex-start;
+}
+.coverCopy {
+  display: flex; flex-direction: column; align-items: flex-start;
 }
 .coverKicker {
   display: inline-flex; padding: 6px 9px; border-radius: 999px;
@@ -224,39 +248,146 @@
   color: var(--wk-gold2); text-shadow: 0 4px 20px rgba(0,0,0,.62);
 }
 
-/* 土地庙 hover 装饰：反馈项 1（"直面天命"文案不够直观）。封面根是
+/* 土地庙 = 存档点 = 历史对话入口（用户明确改需求：不再是纯 hover 装饰）。
+   与"直面天命"标题同列在左侧，构图上是一体——标题在上，土地庙在下，
+   左对齐坐落在原生侧栏的水平区域，暗示"点它能到侧栏"。封面根是
    pointer-events: none 的纯装饰层，这是唯一显式打开 pointer-events 的
-   例外——土地庙需要响应 hover，但它不是按钮、不接受焦点、不拦截任何
-   点击语义。真机确认见 screenshots/shot-shrine-hover.png：右下角是
-   hero 页空背景区，不压 composer / 文案。 */
+   例外：土地庙是真实 <button>，点击切换 .cover[data-wk-shrine-open]，
+   只影响皮肤自身的封面呈现，不代产品提交/导航。 */
 .coverShrine {
-  position: absolute;
-  right: 4%;
-  bottom: 6%;
-  width: clamp(180px, 17vw, 300px);
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 28px;
+  width: clamp(150px, 14vw, 240px);
+  background: transparent;
+  border: none;
+  padding: 0;
   pointer-events: auto;
-  cursor: default;
+  cursor: pointer;
+}
+.coverShrineFigure {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.coverShrineArt {
+  display: block;
+  width: 100%; height: auto;
   filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.55));
   transition: transform 0.35s ease, filter 0.35s ease;
 }
-.coverShrine:hover {
+.coverShrine:hover .coverShrineArt,
+.coverShrine:focus-visible .coverShrineArt {
   transform: translateY(-10px);
   filter: drop-shadow(0 26px 50px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 24px rgba(224, 177, 103, 0.55));
+}
+
+/* 香火烟雾——唯一允许的循环动画例外：hero 封面是待机标题页而非工作态
+   （对齐 afterglow 雨层先例：待机页允许一条氛围级循环动效，工作视图内
+   则不允许），且只存在于 cover 子树，封面隐藏（opacity: 0）时随之不可见，
+   不额外消耗可感知的注意力。土地庙美术图（tudimiao.webp，700×840）本身
+   已画出香炉与静态香烟，真机量得香炉开口约在图高 71%、水平略偏中右
+   54%——三缕动态烟雾从该点起升，与画面里的静态香烟衔接。只动
+   transform/opacity（GPU 合成），不触碰会引发重排的属性；模糊半径小
+   （3–5px），三缕错峰不同时长/延迟以免看起来像同一份动画在重复。 */
+.coverShrineSmoke {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.smokeWisp {
+  position: absolute;
+  left: 54%;
+  top: 71%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(220, 220, 215, 0.35), rgba(220, 220, 215, 0) 70%);
+  filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  animation: wkIncenseSmoke 7s ease-in infinite;
+  will-change: transform, opacity;
+}
+.smokeWisp:nth-child(2) {
+  left: 55.5%;
+  filter: blur(3px);
+  animation-duration: 8s;
+  animation-delay: 2.4s;
+}
+.smokeWisp:nth-child(3) {
+  left: 52.5%;
+  filter: blur(5px);
+  animation-duration: 6.5s;
+  animation-delay: 4.8s;
+}
+@keyframes wkIncenseSmoke {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  12% { opacity: 0.34; }
+  50% { transform: translate(6px, -45px) scale(1); opacity: 0.2; }
+  85% { opacity: 0.08; }
+  100% { transform: translate(-5px, -85px) scale(1.35); opacity: 0; }
+}
+/* 封面不可见时暂停动画——省一点常驻合成层开销，无视觉差异（opacity:0 下
+   本就不可见）。悬停/聚焦时烟雾略微加快，呼应土地庙本身的浮起反馈。 */
+.cover:not([data-visible]) .smokeWisp {
+  animation-play-state: paused;
+}
+.coverShrine:hover .smokeWisp,
+.coverShrine:focus-visible .smokeWisp {
+  animation-duration: 5s;
+}
+.coverShrine:hover .smokeWisp:nth-child(2),
+.coverShrine:focus-visible .smokeWisp:nth-child(2) {
+  animation-duration: 5.8s;
+}
+.coverShrine:hover .smokeWisp:nth-child(3),
+.coverShrine:focus-visible .smokeWisp:nth-child(3) {
+  animation-duration: 4.6s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .coverShrineSmoke { display: none; }
+}
+
+.coverShrineHint {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--wk-gold2);
+  text-shadow: 0 2px 10px rgba(0,0,0,.65);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.coverShrine:hover .coverShrineHint,
+.coverShrine:focus-visible .coverShrineHint {
+  opacity: 1;
+  transform: translateY(0);
 }
 @media (max-width: 899px) {
   .coverShrine {
     width: clamp(110px, 22vw, 170px);
-    bottom: 4%;
-    right: 3%;
+    margin-top: 18px;
   }
 }
 @media (max-width: 599px) {
   .coverShrine {
-    display: none; /* 窄屏封面标题优先，土地庙让位 */
+    /* 用户明确要求土地庙是可点的历史对话入口，窄屏不能再隐藏——
+       缩到最小尺寸而不是 display:none。 */
+    width: clamp(84px, 26vw, 130px);
+    margin-top: 12px;
+  }
+  .coverShrineHint {
+    font-size: 10px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .coverShrine { transition: none; }
+  .coverShrine, .coverShrineArt, .coverShrineHint, .coverArt, .cover::after { transition: none; }
 }
 
 /* ===== 角色舞台（P1）===== */
